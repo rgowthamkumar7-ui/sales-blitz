@@ -1,115 +1,190 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { SaleTransaction, StockIssued, SaleEntry, Outlet } from '@/types';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { SaleTransaction, StockIssued, DSTarget, SalesmanMappedOutlets } from '@/types';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { mockSKUs, mockIncentiveSlabs } from '@/data/mockData';
-import { useAuth } from './AuthContext';
+import { mockUsers } from '@/data/mockData';
 
 interface SalesContextType {
-  transactions: SaleTransaction[];
-  stockIssued: StockIssued[];
-  addSale: (outletId: string, entries: SaleEntry[]) => void;
-  getTodaysSales: () => SaleTransaction[];
-  getMonthlyPoints: () => number;
-  getCurrentIncentive: () => number;
-  getNextSlabProgress: () => { current: number; target: number; percentage: number };
-  selectedOutlet: Outlet | null;
-  setSelectedOutlet: (outlet: Outlet | null) => void;
+    transactions: SaleTransaction[];
+    stockIssued: StockIssued[];
+    dsTargets: DSTarget[];
+    salesmanMappedOutlets: SalesmanMappedOutlets[];
+    addSaleTransaction: (
+        salesmanId: string,
+        outletId: string,
+        skuId: string,
+        quantity: number,
+        points: number,
+        date?: string
+    ) => void;
+    addBulkSaleTransactions: (
+        salesmanId: string,
+        entries: { skuId: string; quantity: number; outletCount: number; points: number }[],
+        date?: string
+    ) => void;
+    issueStock: (salesmanId: string, skuId: string, quantity: number, issuedBy: string) => void;
+    setDSTargets: (targets: DSTarget[]) => void;
+    getSalesmanSalesForDate: (salesmanId: string, date: string) => SaleTransaction[];
+    hasSalesmanEntryForDate: (salesmanId: string, date: string) => boolean;
+    getSalesmanMappedOutlets: (salesmanId: string) => number;
+    setSalesmanMappedOutlets: (salesmanId: string, totalOutlets: number, updatedBy: string) => void;
 }
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
 
+
 export const SalesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { currentUser } = useAuth();
-  const [transactions, setTransactions] = useLocalStorage<SaleTransaction[]>('salesTransactions', []);
-  const [stockIssued] = useLocalStorage<StockIssued[]>('stockIssued', []);
-  const [selectedOutlet, setSelectedOutlet] = useLocalStorage<Outlet | null>('selectedOutlet', null);
+    const [transactions, setTransactions] = useLocalStorage<SaleTransaction[]>('salesTransactions', []);
+    const [stockIssued, setStockIssued] = useLocalStorage<StockIssued[]>('stockIssued', []);
+    const [dsTargets, setDSTargetsState] = useLocalStorage<DSTarget[]>('dsTargets', []);
+    const [salesmanMappedOutlets, setSalesmanMappedOutletsState] = useLocalStorage<SalesmanMappedOutlets[]>('salesmanMappedOutlets', []);
 
-  const addSale = (outletId: string, entries: SaleEntry[]) => {
-    if (!currentUser) return;
-
-    const newTransactions: SaleTransaction[] = entries
-      .filter(entry => entry.quantity > 0)
-      .map(entry => {
-        const sku = mockSKUs.find(s => s.id === entry.skuId);
-        return {
-          id: `${Date.now()}-${entry.skuId}`,
-          salesmanId: currentUser.id,
-          outletId,
-          skuId: entry.skuId,
-          quantity: entry.quantity,
-          points: (sku?.pointsPerUnit || 0) * entry.quantity,
-          timestamp: new Date().toISOString(),
+    // Add a single sale transaction
+    const addSaleTransaction = (
+        salesmanId: string,
+        outletId: string,
+        skuId: string,
+        quantity: number,
+        points: number,
+        date?: string
+    ) => {
+        const transaction: SaleTransaction = {
+            id: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            salesmanId,
+            outletId,
+            skuId,
+            quantity,
+            outletCount: 1, // Default to 1 outlet for single transaction
+            points,
+            timestamp: date || new Date().toISOString(),
         };
-      });
 
-    setTransactions(prev => [...prev, ...newTransactions]);
-  };
+        setTransactions(prev => [...prev, transaction]);
+    };
 
-  const getTodaysSales = (): SaleTransaction[] => {
-    if (!currentUser) return [];
-    const today = new Date().toDateString();
-    return transactions.filter(t => 
-      t.salesmanId === currentUser.id && 
-      new Date(t.timestamp).toDateString() === today
+    // Add bulk sale transactions (used by Team Leader for entering daily sales)
+    const addBulkSaleTransactions = (
+        salesmanId: string,
+        entries: { skuId: string; quantity: number; outletCount: number; points: number }[],
+        date?: string
+    ) => {
+        const selectedDate = date || new Date().toISOString().split('T')[0];
+        const timestamp = new Date(selectedDate).toISOString();
+
+        // Remove existing entries for this salesman on this date
+        setTransactions(prev => {
+            const filtered = prev.filter(t => {
+                const txnDate = new Date(t.timestamp).toISOString().split('T')[0];
+                return !(t.salesmanId === salesmanId && txnDate === selectedDate);
+            });
+
+            // Add new transactions
+            const newTransactions = entries
+                .filter(e => e.quantity > 0 || e.outletCount > 0)
+                .map((entry, index) => ({
+                    id: `txn-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+                    salesmanId,
+                    outletId: 'TL-ENTRY', // Special marker for TL-entered sales
+                    skuId: entry.skuId,
+                    quantity: entry.quantity,
+                    outletCount: entry.outletCount,
+                    points: entry.points,
+                    timestamp,
+                }));
+
+            return [...filtered, ...newTransactions];
+        });
+    };
+
+    // Get sales for a specific salesman on a specific date
+    const getSalesmanSalesForDate = (salesmanId: string, date: string): SaleTransaction[] => {
+        return transactions.filter(t => {
+            const txnDate = new Date(t.timestamp).toISOString().split('T')[0];
+            return t.salesmanId === salesmanId && txnDate === date;
+        });
+    };
+
+    // Check if salesman has any entry for a specific date
+    const hasSalesmanEntryForDate = (salesmanId: string, date: string): boolean => {
+        return transactions.some(t => {
+            const txnDate = new Date(t.timestamp).toISOString().split('T')[0];
+            return t.salesmanId === salesmanId && txnDate === date;
+        });
+    };
+
+    // Issue stock from TL to Salesman
+    const issueStock = (salesmanId: string, skuId: string, quantity: number, issuedBy: string) => {
+        const stockEntry: StockIssued = {
+            id: `stock-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            salesmanId,
+            skuId,
+            quantity,
+            date: new Date().toISOString(),
+            issuedBy,
+        };
+
+        setStockIssued(prev => [...prev, stockEntry]);
+    };
+
+    // Set DS Targets (used by Manager upload)
+    const setDSTargets = (targets: DSTarget[]) => {
+        setDSTargetsState(targets);
+    };
+
+    // Get salesman's total mapped outlets
+    const getSalesmanMappedOutlets = (salesmanId: string): number => {
+        // First check locally saved override
+        const entry = salesmanMappedOutlets.find(m => m.salesmanId === salesmanId);
+        if (entry) return entry.totalMappedOutlets;
+
+        // Fallback to default user data (mock)
+        // Note: In a real app, this would be part of the user object fetched from API
+        const user = mockUsers.find((u) => u.id === salesmanId);
+        return user?.totalMappedOutlets || 0;
+    };
+
+    // Set salesman's total mapped outlets
+    const setSalesmanMappedOutlets = (salesmanId: string, totalOutlets: number, updatedBy: string) => {
+
+        setSalesmanMappedOutletsState(prev => {
+            // Remove existing entry for this salesman
+            const filtered = prev.filter(m => m.salesmanId !== salesmanId);
+            // Add new entry
+            return [...filtered, {
+                salesmanId,
+                totalMappedOutlets: totalOutlets,
+                updatedAt: new Date().toISOString(),
+                updatedBy,
+            }];
+        });
+    };
+
+    return (
+        <SalesContext.Provider
+            value={{
+                transactions,
+                stockIssued,
+                dsTargets,
+                salesmanMappedOutlets,
+                addSaleTransaction,
+                addBulkSaleTransactions,
+                issueStock,
+                setDSTargets,
+                getSalesmanSalesForDate,
+                hasSalesmanEntryForDate,
+                getSalesmanMappedOutlets,
+                setSalesmanMappedOutlets,
+            }}
+        >
+            {children}
+        </SalesContext.Provider>
     );
-  };
-
-  const getMonthlyPoints = (): number => {
-    if (!currentUser) return 0;
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    return transactions
-      .filter(t => 
-        t.salesmanId === currentUser.id && 
-        new Date(t.timestamp) >= monthStart
-      )
-      .reduce((sum, t) => sum + t.points, 0);
-  };
-
-  const getCurrentIncentive = (): number => {
-    const points = getMonthlyPoints();
-    const slab = mockIncentiveSlabs.find(s => points >= s.minPoints && points <= s.maxPoints);
-    return slab?.incentiveAmount || 0;
-  };
-
-  const getNextSlabProgress = () => {
-    const points = getMonthlyPoints();
-    const currentSlabIndex = mockIncentiveSlabs.findIndex(s => points >= s.minPoints && points <= s.maxPoints);
-    const nextSlab = mockIncentiveSlabs[currentSlabIndex + 1];
-    
-    if (!nextSlab) {
-      return { current: points, target: points, percentage: 100 };
-    }
-
-    const currentSlab = mockIncentiveSlabs[currentSlabIndex];
-    const progressInSlab = points - currentSlab.minPoints;
-    const slabRange = nextSlab.minPoints - currentSlab.minPoints;
-    const percentage = Math.min((progressInSlab / slabRange) * 100, 100);
-
-    return { current: points, target: nextSlab.minPoints, percentage };
-  };
-
-  return (
-    <SalesContext.Provider value={{
-      transactions,
-      stockIssued,
-      addSale,
-      getTodaysSales,
-      getMonthlyPoints,
-      getCurrentIncentive,
-      getNextSlabProgress,
-      selectedOutlet,
-      setSelectedOutlet,
-    }}>
-      {children}
-    </SalesContext.Provider>
-  );
 };
 
+
 export const useSales = () => {
-  const context = useContext(SalesContext);
-  if (context === undefined) {
-    throw new Error('useSales must be used within a SalesProvider');
-  }
-  return context;
+    const context = useContext(SalesContext);
+    if (context === undefined) {
+        throw new Error('useSales must be used within a SalesProvider');
+    }
+    return context;
 };

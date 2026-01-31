@@ -5,31 +5,53 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface AuthContextType {
   currentUser: User | null;
-  login: (pin: string) => User | null;
+  loginByName: (name: string, roleType: 'manager' | 'team_leader') => User | null;
   logout: () => void;
   isAuthenticated: boolean;
+  rememberedUsers: { name: string; roleType: 'manager' | 'team_leader' }[];
+  addRememberedUser: (name: string, roleType: 'manager' | 'team_leader') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [savedUserId, setSavedUserId] = useLocalStorage<string | null>('currentUserId', null);
+  // Session storage for current login (clears when browser closes)
+  const [sessionUserId, setSessionUserId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('currentUserId');
+    }
+    return null;
+  });
+
+  // Local storage for remembered users (persists)
+  const [rememberedUsers, setRememberedUsers] = useLocalStorage<{ name: string; roleType: 'manager' | 'team_leader' }[]>('rememberedUsers', []);
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  // Restore session on mount
   useEffect(() => {
-    if (savedUserId) {
-      const user = mockUsers.find(u => u.id === savedUserId);
+    if (sessionUserId) {
+      const user = mockUsers.find(u => u.id === sessionUserId);
       if (user) {
         setCurrentUser(user);
       }
     }
-  }, [savedUserId]);
+  }, [sessionUserId]);
 
-  const login = (pin: string): User | null => {
-    const user = mockUsers.find(u => u.pin === pin);
+  const loginByName = (name: string, roleType: 'manager' | 'team_leader'): User | null => {
+    // Find user by name and role type (case-insensitive)
+    const normalizedName = name.trim().toLowerCase();
+    const user = mockUsers.find(u => {
+      const matchesName = u.name.toLowerCase() === normalizedName;
+      const matchesRole = u.role === roleType;
+      return matchesName && matchesRole;
+    });
+
     if (user) {
       setCurrentUser(user);
-      setSavedUserId(user.id);
+      setSessionUserId(user.id);
+      sessionStorage.setItem('currentUserId', user.id);
+      addRememberedUser(name, roleType);
       return user;
     }
     return null;
@@ -37,15 +59,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     setCurrentUser(null);
-    setSavedUserId(null);
+    setSessionUserId(null);
+    sessionStorage.removeItem('currentUserId');
+  };
+
+  const addRememberedUser = (name: string, roleType: 'manager' | 'team_leader') => {
+    setRememberedUsers(prev => {
+      // Remove if exists and add to front (most recent first)
+      const filtered = prev.filter(u => !(u.name.toLowerCase() === name.toLowerCase() && u.roleType === roleType));
+      return [{ name, roleType }, ...filtered].slice(0, 10); // Keep only 10 most recent
+    });
   };
 
   return (
     <AuthContext.Provider value={{
       currentUser,
-      login,
+      loginByName,
       logout,
       isAuthenticated: !!currentUser,
+      rememberedUsers,
+      addRememberedUser,
     }}>
       {children}
     </AuthContext.Provider>
