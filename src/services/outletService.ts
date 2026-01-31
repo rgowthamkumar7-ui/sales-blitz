@@ -29,9 +29,9 @@ export const outletService = {
             .from('outlets')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        if (error) return null;
+        if (error || !data) return null;
         return transformOutlet(data);
     },
 

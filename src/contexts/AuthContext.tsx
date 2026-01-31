@@ -5,7 +5,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface AuthContextType {
   currentUser: User | null;
-  loginByName: (name: string, roleType: 'manager' | 'team_leader') => Promise<User | null>;
+  loginByName: (name: string, roleType: 'manager' | 'team_leader', password?: string) => Promise<User | null>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -48,9 +48,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     restoreSession();
   }, [sessionUserId]);
 
-  const loginByName = async (name: string, roleType: 'manager' | 'team_leader'): Promise<User | null> => {
+  const loginByName = async (name: string, roleType: 'manager' | 'team_leader', password?: string): Promise<User | null> => {
     try {
-      const user = await userService.findByNameAndRole(name, roleType);
+      // Use verified login
+      const user = await userService.login(name, roleType, password);
 
       if (user) {
         setCurrentUser(user);

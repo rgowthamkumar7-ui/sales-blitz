@@ -133,7 +133,7 @@ export const SalesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 if (entry.quantity > 0 || entry.outletCount > 0) {
                     const txn = await salesService.create({
                         salesmanId,
-                        outletId: 'TL-ENTRY', // Special marker for TL-entered sales
+                        outletId: null, // Special marker for TL-entered sales (no specific outlet)
                         skuId: entry.skuId,
                         quantity: entry.quantity,
                         outletCount: entry.outletCount,

@@ -61,9 +61,9 @@ export const skuService = {
             .from('skus')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        if (error) return null;
+        if (error || !data) return null;
         return transformSKU(data);
     },
 

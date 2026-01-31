@@ -21,6 +21,7 @@ const PinLogin: React.FC<PinLoginProps> = ({
     const { loginByName, rememberedUsers } = useAuth();
     const [selectedRoleType, setSelectedRoleType] = useState<RoleType | null>(null);
     const [selectedName, setSelectedName] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
     const [showNameDropdown, setShowNameDropdown] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +53,7 @@ const PinLogin: React.FC<PinLoginProps> = ({
             }
         };
 
+        setPassword('');
         fetchUsers();
     }, [selectedRoleType]);
 
@@ -72,6 +74,7 @@ const PinLogin: React.FC<PinLoginProps> = ({
 
     const handleNameSelect = (name: string) => {
         setSelectedName(name);
+        setPassword('');
         setShowNameDropdown(false);
         setError(null);
     };
@@ -90,11 +93,11 @@ const PinLogin: React.FC<PinLoginProps> = ({
         setError(null);
 
         try {
-            const user = await loginByName(selectedName, selectedRoleType);
+            const user = await loginByName(selectedName, selectedRoleType, password);
             if (user) {
                 onSuccess();
             } else {
-                setError('User not found. Please check your selection.');
+                setError('Invalid credentials. Please check name and password.');
             }
         } catch (err) {
             console.error('Login failed:', err);
@@ -269,6 +272,29 @@ const PinLogin: React.FC<PinLoginProps> = ({
                                 )}
                             </AnimatePresence>
                         </div>
+
+                        {/* Password Input - Only for Managers */}
+                        <AnimatePresence>
+                            {selectedName && selectedRoleType === 'manager' && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="space-y-1"
+                                >
+                                    <label className="text-xs text-muted-foreground font-medium ml-1">Password</label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => {
+                                            setPassword(e.target.value);
+                                            setError(null);
+                                        }}
+                                        className="w-full p-4 rounded-xl border-2 bg-background hover:border-primary/50 focus:border-primary focus:outline-none transition-all"
+                                        placeholder="Enter password"
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Error */}
                         {error && (

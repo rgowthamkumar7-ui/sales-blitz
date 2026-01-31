@@ -48,7 +48,7 @@ export interface StockIssued {
 export interface SaleTransaction {
   id: string;
   salesmanId: string;
-  outletId: string;
+  outletId: string | null;
   skuId: string;
   quantity: number;
   outletCount: number; // Number of outlets where this SKU was sold

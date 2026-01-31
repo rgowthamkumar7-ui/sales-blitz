@@ -45,6 +45,7 @@ export interface Database {
                     team_leader_id: string | null;
                     distributor_id: string | null;
                     total_mapped_outlets: number;
+                    password: string | null;
                     created_at: string;
                     updated_at: string;
                 };
@@ -57,6 +58,7 @@ export interface Database {
                     team_leader_id?: string | null;
                     distributor_id?: string | null;
                     total_mapped_outlets?: number;
+                    password?: string | null;
                     created_at?: string;
                     updated_at?: string;
                 };
@@ -69,6 +71,7 @@ export interface Database {
                     team_leader_id?: string | null;
                     distributor_id?: string | null;
                     total_mapped_outlets?: number;
+                    password?: string | null;
                     updated_at?: string;
                 };
             };
@@ -210,7 +213,7 @@ export interface Database {
                 Row: {
                     id: string;
                     salesman_id: string;
-                    outlet_id: string;
+                    outlet_id: string | null;
                     sku_id: string;
                     quantity: number;
                     outlet_count: number;
@@ -221,7 +224,7 @@ export interface Database {
                 Insert: {
                     id?: string;
                     salesman_id: string;
-                    outlet_id: string;
+                    outlet_id?: string | null;
                     sku_id: string;
                     quantity: number;
                     outlet_count?: number;
@@ -232,7 +235,7 @@ export interface Database {
                 Update: {
                     id?: string;
                     salesman_id?: string;
-                    outlet_id?: string;
+                    outlet_id?: string | null;
                     sku_id?: string;
                     quantity?: number;
                     outlet_count?: number;

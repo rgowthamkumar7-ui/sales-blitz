@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SalesProvider, useSales } from '@/contexts/SalesContext';
 import { userService } from '@/services/userService';
@@ -34,16 +35,25 @@ import PinLogin from '@/components/salesman/PinLogin';
 import * as XLSX from 'xlsx';
 
 import { DSTarget, User, Distributor, SKU } from '@/types';
+import { UserManagementDialog } from '@/components/manager/UserManagementDialog';
 
 // Main content component
 const ManagerContent: React.FC = () => {
   const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
   const { transactions: storedTransactions, stockIssued, dsTargets, setDSTargets, isLoading: isSalesLoading } = useSales();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   const [selectedDays, setSelectedDays] = useState<string>('7');
   const [showTargetUploadDialog, setShowTargetUploadDialog] = useState(false);
   const [uploadedTargets, setUploadedTargets] = useState<DSTarget[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
 
   // Supabase data states
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -615,15 +625,34 @@ const ManagerContent: React.FC = () => {
             <p className="text-white/80 text-sm">Manager Dashboard</p>
             <h1 className="text-xl font-bold">{currentUser?.name}</h1>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={logout}
-            className="text-white/80 hover:text-white hover:bg-white/10"
-          >
-            <LogOut size={20} />
-          </Button>
+          <div className="flex items-center gap-2">
+            {(currentUser?.managerLevel === 'AM1' || currentUser?.managerLevel === 'AM2') && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowUserManagement(true)}
+                className="text-white/80 hover:text-white hover:bg-white/10"
+              >
+                <Users size={20} />
+              </Button>
+            )}
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+            >
+              <LogOut size={20} />
+            </Button>
+          </div>
         </div>
+
+        <UserManagementDialog
+          open={showUserManagement}
+          onOpenChange={setShowUserManagement}
+        />
+
 
         {/* Filters */}
         <div className="flex gap-2">

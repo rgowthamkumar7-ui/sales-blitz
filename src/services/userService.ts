@@ -50,9 +50,9 @@ export const userService = {
             .from('users')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        if (error) return null;
+        if (error || !data) return null;
 
         const user = transformUser(data);
 
@@ -71,16 +71,32 @@ export const userService = {
         return user;
     },
 
-    // Get user by name and role (for login)
-    async findByNameAndRole(name: string, role: 'manager' | 'team_leader'): Promise<User | null> {
+    // Login with name, role and password
+    async login(name: string, role: 'manager' | 'team_leader', password?: string): Promise<User | null> {
         const { data, error } = await supabase
             .from('users')
             .select('*')
             .ilike('name', name.trim())
             .eq('role', role)
-            .single();
+            .maybeSingle();
 
-        if (error) return null;
+        if (error || !data) return null;
+
+        // Verify password if provided (for new system)
+        // If password is in DB, check it.
+        // We compare case-insensitively and trim whitespace to be forgiving
+        // Verify password
+        // Only enforce for managers as per request "There should not be a password check for Team leader"
+        if (role === 'manager') {
+            if (data.password) {
+                if (!password) return null; // Password required for manager
+
+                const dbPass = data.password.toString().trim().toLowerCase();
+                const inputPass = password.toString().trim().toLowerCase();
+
+                if (dbPass !== inputPass) return null;
+            }
+        }
 
         const user = transformUser(data);
 
@@ -97,6 +113,30 @@ export const userService = {
         }
 
         return user;
+    },
+
+    // Set password for a user
+    async setPassword(id: string, password: string): Promise<void> {
+        const { error } = await supabase
+            .from('users')
+            .update({
+                password: password,
+                updated_at: new Date().toISOString()
+            } as any) // Type assertion due to manual column add
+            .eq('id', id);
+
+        if (error) throw error;
+    },
+
+    // Reset password to default (first 3 chars of name)
+    async resetPassword(id: string, name: string): Promise<void> {
+        const defaultPassword = name.substring(0, 3).toLowerCase();
+        await this.setPassword(id, defaultPassword);
+    },
+
+    // Find user by name and role (legacy/internal use)
+    async findByNameAndRole(name: string, role: 'manager' | 'team_leader'): Promise<User | null> {
+        return this.login(name, role); // Reuse login without password?
     },
 
     // Get managers
@@ -171,24 +211,6 @@ export const userService = {
 
         if (error) throw error;
         return data.map(transformUser);
-    },
-
-    // Update user
-    async update(id: string, updates: Partial<User>): Promise<User | null> {
-        const { data, error } = await supabase
-            .from('users')
-            .update({
-                name: updates.name,
-                phone: updates.phone,
-                total_mapped_outlets: updates.totalMappedOutlets,
-                updated_at: new Date().toISOString(),
-            })
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return transformUser(data);
     },
 
     // Update mapped outlets for a salesman

@@ -30,9 +30,9 @@ export const distributorService = {
             .from('distributors')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        if (error) return null;
+        if (error || !data) return null;
         return transformDistributor(data);
     },
 
@@ -64,9 +64,9 @@ export const distributorService = {
             .from('distributors')
             .select('*')
             .eq('wd_code', wdCode)
-            .single();
+            .maybeSingle();
 
-        if (error) return null;
+        if (error || !data) return null;
         return transformDistributor(data);
     },
 

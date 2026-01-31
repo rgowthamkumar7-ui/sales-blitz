@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SalesProvider, useSales } from '@/contexts/SalesContext';
 import { userService } from '@/services/userService';
@@ -17,7 +18,14 @@ type ViewState = 'home' | 'salesman-list' | 'entry';
 // Main content component
 const TeamLeaderContent: React.FC = () => {
   const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
   const { addBulkSaleTransactions, hasSalesmanEntryForDate, getSalesmanSalesForDate, transactions, getSalesmanMappedOutlets, setSalesmanMappedOutlets, isLoading: isSalesLoading } = useSales();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   const [view, setView] = useState<ViewState>('home');
   const [selectedSalesman, setSelectedSalesman] = useState<User | null>(null);
   const [salesInputs, setSalesInputs] = useState<Record<string, { packs: string; outlets: string }>>({});
@@ -241,7 +249,7 @@ const TeamLeaderContent: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={logout}
+              onClick={handleLogout}
               className="text-white/80 hover:text-white hover:bg-white/10"
             >
               <LogOut size={20} />
@@ -372,8 +380,91 @@ const TeamLeaderContent: React.FC = () => {
           </Card>
           <Card className="p-4 text-center">
             <Store size={24} className="mx-auto text-purple-500 mb-2" />
-            <p className="text-2xl font-bold text-foreground">{completionStats.totalOutlets}</p>
-            <p className="text-xs text-muted-foreground">Outlets Covered</p>
+            <p className="text-2xl font-bold text-foreground">
+              {assignedSalesmen.reduce((sum, s) => sum + (getSalesmanMappedOutlets(s.id) || 0), 0)}
+            </p>
+            <p className="text-xs text-muted-foreground">Total Outlets Mapped</p>
+          </Card>
+        </div>
+
+        {/* Calendar Stats */}
+        <div className="px-4 mt-6 mb-6">
+          <Card className="p-4 shadow-lg">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar size={18} className="text-primary" />
+              <h2 className="font-semibold text-foreground">Entry Performance</h2>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className="text-[10px] text-muted-foreground font-medium uppercase">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-1">
+              {(() => {
+                const today = new Date();
+                const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+
+                const days = [];
+                // Empty cells for days before start of month
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                  days.push(<div key={`empty-${i}`} className="h-10"></div>);
+                }
+
+                // Days of month
+                for (let d = 1; d <= daysInMonth; d++) {
+                  const date = new Date(today.getFullYear(), today.getMonth(), d);
+                  const dateStr = date.toISOString().split('T')[0];
+
+                  // Calculate stats for this day
+                  // Filter transactions for this date to find unique salesmen who sold something
+                  const salesmenWithSales = new Set(
+                    transactions
+                      .filter(t => {
+                        const tDate = new Date(t.timestamp).toISOString().split('T')[0];
+                        return tDate === dateStr && assignedSalesmen.some(s => s.id === t.salesmanId);
+                      })
+                      .map(t => t.salesmanId)
+                  ).size;
+
+                  const totalStats = assignedSalesmen.length;
+                  const isHalfDone = totalStats > 0 && salesmenWithSales >= (totalStats / 2);
+                  const isFuture = date > new Date();
+
+                  let bgColor = 'bg-muted/30';
+                  let textColor = 'text-muted-foreground';
+
+                  if (!isFuture && totalStats > 0) {
+                    bgColor = isHalfDone ? 'bg-green-100 dark:bg-green-900/30 border-green-200 dark:border-green-800' : 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800';
+                    textColor = isHalfDone ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400';
+                  }
+
+                  if (isFuture) {
+                    bgColor = 'bg-muted/10 opacity-50';
+                  }
+
+                  days.push(
+                    <div
+                      key={d}
+                      className={`h-14 rounded-lg border flex flex-col items-center justify-center relative ${bgColor}`}
+                    >
+                      <span className={`text-xs font-medium mb-0.5 ${isFuture ? 'text-muted-foreground' : 'text-foreground'}`}>{d}</span>
+                      {!isFuture && totalStats > 0 && (
+                        <span className={`text-[10px] font-bold ${textColor}`}>
+                          {salesmenWithSales}/{totalStats}
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
+
+                return days;
+              })()}
+            </div>
           </Card>
         </div>
 
@@ -644,23 +735,13 @@ const TeamLeaderContent: React.FC = () => {
           </div>
 
           {/* Totals */}
-          <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-4">
-            <div className="flex items-center justify-between px-2">
+          <div className="mt-4 pt-4 border-t flex justify-center">
+            <div className="flex items-center gap-4 px-2">
               <div className="flex items-center gap-2">
                 <Package size={14} className="text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Total Packs:</span>
               </div>
               <span className="text-lg font-bold text-foreground">{totalPacks}</span>
-            </div>
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-2">
-                <Store size={14} className="text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Total Outlets:</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-foreground">{totalOutlets}</span>
-                <span className="text-sm text-muted-foreground">/ {mappedOutletsInput || 0}</span>
-              </div>
             </div>
           </div>
         </Card>
