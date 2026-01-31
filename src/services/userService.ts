@@ -10,7 +10,7 @@ function transformUser(row: any): User {
         role: row.role,
         managerLevel: row.manager_level,
         teamLeaderId: row.team_leader_id,
-        distributorId: row.distributor_id,
+        distributorId: row.distributor_id?.trim(),
         distributorIds: row.distributor_ids || [],
         totalMappedOutlets: row.total_mapped_outlets || 0,
     };
@@ -21,12 +21,13 @@ export const userService = {
     async getAll(): Promise<User[]> {
         const { data, error } = await supabase
             .from('users')
-            .select('*');
+            .select('*')
+            .limit(10000);
 
         if (error) throw error;
 
         // For AE managers, get their distributor IDs
-        const users = data.map(transformUser);
+        const users = (data as any[]).map(transformUser);
         const aeManagers = users.filter(u => u.role === 'manager' && u.managerLevel === 'AE');
 
         // Fetch distributor assignments for AE managers
@@ -37,7 +38,7 @@ export const userService = {
                 .eq('manager_id', ae.id);
 
             if (assignments) {
-                ae.distributorIds = assignments.map(a => a.distributor_id);
+                ae.distributorIds = (assignments as any[]).map(a => a.distributor_id);
             }
         }
 
@@ -64,7 +65,7 @@ export const userService = {
                 .eq('manager_id', user.id);
 
             if (assignments) {
-                user.distributorIds = assignments.map(a => a.distributor_id);
+                user.distributorIds = (assignments as any[]).map(a => a.distributor_id);
             }
         }
 
@@ -82,23 +83,26 @@ export const userService = {
 
         if (error || !data) return null;
 
+        // Cast to any to access properties that might be 'never' due to types
+        const userData = data as any;
+
         // Verify password if provided (for new system)
         // If password is in DB, check it.
         // We compare case-insensitively and trim whitespace to be forgiving
         // Verify password
         // Only enforce for managers as per request "There should not be a password check for Team leader"
         if (role === 'manager') {
-            if (data.password) {
+            if (userData.password) {
                 if (!password) return null; // Password required for manager
 
-                const dbPass = data.password.toString().trim().toLowerCase();
+                const dbPass = userData.password.toString().trim().toLowerCase();
                 const inputPass = password.toString().trim().toLowerCase();
 
                 if (dbPass !== inputPass) return null;
             }
         }
 
-        const user = transformUser(data);
+        const user = transformUser(userData);
 
         // For AE managers, get their distributor IDs
         if (user.role === 'manager' && user.managerLevel === 'AE') {
@@ -108,7 +112,7 @@ export const userService = {
                 .eq('manager_id', user.id);
 
             if (assignments) {
-                user.distributorIds = assignments.map(a => a.distributor_id);
+                user.distributorIds = (assignments as any[]).map(a => a.distributor_id);
             }
         }
 
@@ -122,7 +126,7 @@ export const userService = {
             .update({
                 password: password,
                 updated_at: new Date().toISOString()
-            } as any) // Type assertion due to manual column add
+            } as unknown as never) // Type assertion due to manual column add
             .eq('id', id);
 
         if (error) throw error;
@@ -148,7 +152,7 @@ export const userService = {
 
         if (error) throw error;
 
-        const users = data.map(transformUser);
+        const users = (data as any[]).map(transformUser);
 
         // Fetch distributor assignments for AE managers
         for (const user of users) {
@@ -159,7 +163,7 @@ export const userService = {
                     .eq('manager_id', user.id);
 
                 if (assignments) {
-                    user.distributorIds = assignments.map(a => a.distributor_id);
+                    user.distributorIds = (assignments as any[]).map(a => a.distributor_id);
                 }
             }
         }
@@ -175,7 +179,7 @@ export const userService = {
             .eq('role', 'team_leader');
 
         if (error) throw error;
-        return data.map(transformUser);
+        return (data as any[]).map(transformUser);
     },
 
     // Get salesmen for a team leader
@@ -187,7 +191,7 @@ export const userService = {
             .eq('team_leader_id', teamLeaderId);
 
         if (error) throw error;
-        return data.map(transformUser);
+        return (data as any[]).map(transformUser);
     },
 
     // Get all salesmen
@@ -198,7 +202,7 @@ export const userService = {
             .eq('role', 'salesman');
 
         if (error) throw error;
-        return data.map(transformUser);
+        return (data as any[]).map(transformUser);
     },
 
     // Get salesmen by distributor
@@ -210,7 +214,7 @@ export const userService = {
             .eq('distributor_id', distributorId);
 
         if (error) throw error;
-        return data.map(transformUser);
+        return (data as any[]).map(transformUser);
     },
 
     // Update mapped outlets for a salesman
@@ -220,7 +224,7 @@ export const userService = {
             .update({
                 total_mapped_outlets: totalOutlets,
                 updated_at: new Date().toISOString(),
-            })
+            } as unknown as never)
             .eq('id', salesmanId);
 
         if (error) throw error;

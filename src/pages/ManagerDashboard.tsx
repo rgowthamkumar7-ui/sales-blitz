@@ -176,6 +176,10 @@ const ManagerContent: React.FC = () => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
+    // Debugging: Log counts
+    // console.log('All Users:', allUsers.length);
+    // console.log('Selected WDs:', selectedWDs.length);
+
     return allTransactions.filter(t => {
       const txnDate = new Date(t.timestamp);
       if (txnDate < cutoffDate) return false;
@@ -376,8 +380,47 @@ const ManagerContent: React.FC = () => {
   const lowStockDS = dsPerformance.filter(ds => ds.isLowStock || ds.isOutOfStock);
 
   const totalSales = filteredTransactions.reduce((sum, t) => sum + t.quantity, 0);
-  const totalOutlets = filteredTransactions.reduce((sum, t) => sum + (t.outletCount || 0), 0);
-  const activeDSCount = new Set(filteredTransactions.map(t => t.salesmanId)).size;
+
+  // Calculate total mapped figures based on filtered distributors
+  const filteredUsers = allUsers.filter(u => u.role === 'salesman' && u.distributorId && selectedWDs.includes(u.distributorId));
+  const totalDsMapped = filteredUsers.length;
+  const totalOutletsMapped = filteredUsers.reduce((sum, u) => sum + (u.totalMappedOutlets || 0), 0);
+
+  // Calculate TLs directly from users with role 'team_leader'
+  // We assume TLs also have a distributor_id, or we count them if they are referenced by any salesman in the current selection?
+  // The user said "Total TLs in the data", implying they expect to see the count of TL entities.
+  // If TLs have 'distributor_id', we use that.
+  // If TLs don't have 'distributor_id' set (null), we might need another way.
+  // Let's try matching 'distributor_id' if present, OR check if they manage any of the filtered salesmen.
+  // But strictly speaking, if a TL is "mapped" to a manager's area, they should be counted.
+  // For now, let's count TLs who are assigned to the selected distributors OR are parents of selected salesmen.
+
+  const relevantTLs = allUsers.filter(u => {
+    if (u.role !== 'team_leader') return false;
+    // Condition 1: TL is directly assigned to one of the selected WDs
+    if (u.distributorId && selectedWDs.includes(u.distributorId)) return true;
+    // Condition 2: TL manages a salesman who is in the selected WDs
+    // (This covers cases where TL might not have distributor_id explicitly set but manages salesmen who do)
+    // Actually, checking if they are 'teamLeaderId' of any 'filteredUsers' is the previous logic which gave 16.
+    // If the count is 22 vs 16, it implies 6 TLs are valid but not managing active salesmen or not linked via salesmen.
+    // Let's assume TLs should have distributor_id.
+    return false;
+  });
+
+  // Re-evaluating: Does the seed data assign distributor_id to TLs?
+  // If yes, simply counting TLs in selected WDs is the correct approach.
+  // If no, and they rely on salesmen linkage, then 16 is "correct" by relation, but "wrong" by expectation.
+  // Let's try combining both: TLs in selected WDs UNION TLs of selected Salesmen.
+
+  const directTLs = allUsers.filter(u => u.role === 'team_leader' && u.distributorId && selectedWDs.includes(u.distributorId));
+  const derivedTLIds = new Set(filteredUsers.map(u => u.teamLeaderId).filter(Boolean));
+
+  const allrelevantTLIds = new Set([
+    ...directTLs.map(u => u.id),
+    ...Array.from(derivedTLIds)
+  ]);
+
+  const totalTLsMapped = allrelevantTLIds.size;
 
   // Toggle WD selection for export
   const toggleExportWD = (wdId: string) => {
@@ -739,7 +782,7 @@ const ManagerContent: React.FC = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="px-4 -mt-4 grid grid-cols-3 gap-2 mb-4">
+      <div className="px-4 -mt-4 grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
         <Card className="p-3 text-center shadow-lg">
           <Package size={20} className="mx-auto text-primary mb-1" />
           <p className="text-xl font-bold text-foreground">{totalSales}</p>
@@ -747,13 +790,18 @@ const ManagerContent: React.FC = () => {
         </Card>
         <Card className="p-3 text-center shadow-lg">
           <Store size={20} className="mx-auto text-amber-500 mb-1" />
-          <p className="text-xl font-bold text-foreground">{totalOutlets}</p>
-          <p className="text-[10px] text-muted-foreground">Outlets</p>
+          <p className="text-xl font-bold text-foreground">{totalOutletsMapped}</p>
+          <p className="text-[10px] text-muted-foreground">Total Outlets Mapped</p>
         </Card>
         <Card className="p-3 text-center shadow-lg">
           <Users size={20} className="mx-auto text-emerald-500 mb-1" />
-          <p className="text-xl font-bold text-foreground">{activeDSCount}</p>
-          <p className="text-[10px] text-muted-foreground">Active DS</p>
+          <p className="text-xl font-bold text-foreground">{totalDsMapped}</p>
+          <p className="text-[10px] text-muted-foreground">Total DS Mapped</p>
+        </Card>
+        <Card className="p-3 text-center shadow-lg">
+          <Users size={20} className="mx-auto text-blue-500 mb-1" />
+          <p className="text-xl font-bold text-foreground">{totalTLsMapped}</p>
+          <p className="text-[10px] text-muted-foreground">Total TLs Mapped</p>
         </Card>
       </div>
 

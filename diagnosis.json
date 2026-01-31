@@ -1,0 +1,11 @@
+{
+  "totalUsers": 109,
+  "totalSalesmen": 80,
+  "totalTLs": 22,
+  "totalManagers": 7,
+  "salesmenNoDist": 0,
+  "salesmenNoTL": 0,
+  "mismatchCount": 0,
+  "tlsNoDist": 0,
+  "activeTLs": 16
+}

@@ -28,7 +28,7 @@ export const salesService = {
                 outlet_count: transaction.outletCount,
                 points: transaction.points,
                 transaction_date: transaction.date || new Date().toISOString().split('T')[0],
-            })
+            } as unknown as never)
             .select()
             .single();
 
@@ -116,12 +116,14 @@ export const salesService = {
 
         if (error) throw error;
 
-        let transactions = data.map(transformTransaction);
+        // Cast data to any[] because complex joins often break type inference
+        const rows = data as any[] || [];
+        let transactions = rows.map(transformTransaction);
 
         // Filter by distributor if specified
         if (params.distributorIds && params.distributorIds.length > 0) {
             transactions = transactions.filter((t: any) => {
-                const salesman = data.find((d: any) => d.id === t.id)?.salesman;
+                const salesman = rows.find((d: any) => d.id === t.id)?.salesman;
                 return salesman && params.distributorIds!.includes(salesman.distributor_id);
             });
         }
