@@ -1,26 +1,15 @@
-<<<<<<< HEAD
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Package, ArrowLeft, LogOut, ChevronRight, Check, Calendar, ChevronLeft, ChevronRightIcon, Store, ClipboardList, TrendingUp, MapPin, Edit2, Loader2 } from 'lucide-react';
-=======
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Package, ArrowLeft, LogOut, ChevronRight, Check, Calendar, ChevronLeft, ChevronRightIcon, Store, ClipboardList, TrendingUp, MapPin, Edit2 } from 'lucide-react';
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SalesProvider, useSales } from '@/contexts/SalesContext';
-<<<<<<< HEAD
 import { userService } from '@/services/userService';
 import { skuService } from '@/services/skuService';
 import { User, SKU } from '@/types';
-=======
-import { mockUsers, mockSKUs } from '@/data/mockData';
-import { User } from '@/types';
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 import PinLogin from '@/components/salesman/PinLogin';
 
 type ViewState = 'home' | 'salesman-list' | 'entry';
@@ -28,11 +17,7 @@ type ViewState = 'home' | 'salesman-list' | 'entry';
 // Main content component
 const TeamLeaderContent: React.FC = () => {
   const { currentUser, logout } = useAuth();
-<<<<<<< HEAD
   const { addBulkSaleTransactions, hasSalesmanEntryForDate, getSalesmanSalesForDate, transactions, getSalesmanMappedOutlets, setSalesmanMappedOutlets, isLoading: isSalesLoading } = useSales();
-=======
-  const { addBulkSaleTransactions, hasSalesmanEntryForDate, getSalesmanSalesForDate, transactions, getSalesmanMappedOutlets, setSalesmanMappedOutlets } = useSales();
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   const [view, setView] = useState<ViewState>('home');
   const [selectedSalesman, setSelectedSalesman] = useState<User | null>(null);
   const [salesInputs, setSalesInputs] = useState<Record<string, { packs: string; outlets: string }>>({});
@@ -43,7 +28,6 @@ const TeamLeaderContent: React.FC = () => {
     return new Date().toISOString().split('T')[0];
   });
 
-<<<<<<< HEAD
   // Supabase data states
   const [assignedSalesmen, setAssignedSalesmen] = useState<User[]>([]);
   const [activeSKUs, setActiveSKUs] = useState<SKU[]>([]);
@@ -74,19 +58,6 @@ const TeamLeaderContent: React.FC = () => {
     fetchData();
   }, [currentUser?.id]);
 
-=======
-
-  // Get salesmen assigned to this team leader
-  const assignedSalesmen = useMemo(() => {
-    return mockUsers.filter(user =>
-      user.role === 'salesman' && user.teamLeaderId === currentUser?.id
-    );
-  }, [currentUser?.id]);
-
-  // Active SKUs (first 3)
-  const activeSKUs = mockSKUs.filter(sku => sku.isActive);
-
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   // Check if salesman has entry for selected date
   const getSalesmanStatus = (salesmanId: string) => {
     const hasEntry = hasSalesmanEntryForDate(salesmanId, selectedDate);
@@ -172,7 +143,6 @@ const TeamLeaderContent: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
   const handleSubmitSales = async () => {
     if (!selectedSalesman || !currentUser) return;
 
@@ -212,40 +182,6 @@ const TeamLeaderContent: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-=======
-  const handleSubmitSales = () => {
-    if (!selectedSalesman || !currentUser) return;
-
-    // Prepare entries
-    const entries = activeSKUs.map(sku => ({
-      skuId: sku.id,
-      quantity: parseInt(salesInputs[sku.id]?.packs || '0', 10),
-      outletCount: parseInt(salesInputs[sku.id]?.outlets || '0', 10),
-      points: parseInt(salesInputs[sku.id]?.packs || '0', 10) * sku.pointsPerUnit,
-    }));
-
-    // Save transactions
-    addBulkSaleTransactions(selectedSalesman.id, entries, selectedDate);
-
-    // Save mapped outlets if provided
-    if (mappedOutletsInput && !isNaN(parseInt(mappedOutletsInput))) {
-      setSalesmanMappedOutlets(
-        selectedSalesman.id,
-        parseInt(mappedOutletsInput),
-        currentUser.name
-      );
-    }
-
-    setShowSuccess(true);
-
-    // Auto-return to DS list after 1.5 seconds
-    setTimeout(() => {
-      setShowSuccess(false);
-      setSelectedSalesman(null);
-      setSalesInputs({});
-      setView('salesman-list');
-    }, 1500);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   };
 
   const hasAnyData = Object.values(salesInputs).some(
@@ -279,7 +215,6 @@ const TeamLeaderContent: React.FC = () => {
     });
   };
 
-<<<<<<< HEAD
   // Loading state
   if (isLoadingData || isSalesLoading) {
     return (
@@ -292,8 +227,6 @@ const TeamLeaderContent: React.FC = () => {
     );
   }
 
-=======
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   // HOME VIEW
   if (view === 'home') {
     return (
@@ -738,7 +671,6 @@ const TeamLeaderContent: React.FC = () => {
         <Button
           className="w-full h-14 text-lg font-bold rounded-xl shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
           onClick={handleSubmitSales}
-<<<<<<< HEAD
           disabled={(!hasAnyData && !Object.keys(salesInputs).length) || isSaving}
         >
           {isSaving ? (
@@ -752,12 +684,6 @@ const TeamLeaderContent: React.FC = () => {
               SAVE SALES
             </>
           )}
-=======
-          disabled={!hasAnyData && !Object.keys(salesInputs).length}
-        >
-          <Check className="mr-2" size={20} />
-          SAVE SALES
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
         </Button>
       </div>
     </div>

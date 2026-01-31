@@ -1,17 +1,9 @@
-<<<<<<< HEAD
 import React, { useState, useMemo, useEffect } from 'react';
-=======
-import React, { useState, useMemo } from 'react';
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 import { motion } from 'framer-motion';
 import {
   BarChart3, Users, Package, TrendingUp, TrendingDown,
   AlertTriangle, Download, LogOut, Calendar, ChevronDown,
-<<<<<<< HEAD
   Building2, Award, AlertCircle, X, Upload, Target, FileSpreadsheet, Store, Loader2
-=======
-  Building2, Award, AlertCircle, X, Upload, Target, FileSpreadsheet, Store
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -35,7 +27,6 @@ import {
 } from '@/components/ui/select';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SalesProvider, useSales } from '@/contexts/SalesContext';
-<<<<<<< HEAD
 import { userService } from '@/services/userService';
 import { distributorService } from '@/services/distributorService';
 import { skuService } from '@/services/skuService';
@@ -43,28 +34,16 @@ import PinLogin from '@/components/salesman/PinLogin';
 import * as XLSX from 'xlsx';
 
 import { DSTarget, User, Distributor, SKU } from '@/types';
-=======
-import { mockUsers, mockSKUs, mockDistributors, mockOutlets, generateSampleTransactions, getDistributorsForManager } from '@/data/mockData';
-import PinLogin from '@/components/salesman/PinLogin';
-import * as XLSX from 'xlsx';
-
-import { DSTarget } from '@/types';
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
 // Main content component
 const ManagerContent: React.FC = () => {
   const { currentUser, logout } = useAuth();
-<<<<<<< HEAD
   const { transactions: storedTransactions, stockIssued, dsTargets, setDSTargets, isLoading: isSalesLoading } = useSales();
-=======
-  const { transactions: storedTransactions, stockIssued, dsTargets, setDSTargets } = useSales();
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   const [selectedDays, setSelectedDays] = useState<string>('7');
   const [showTargetUploadDialog, setShowTargetUploadDialog] = useState(false);
   const [uploadedTargets, setUploadedTargets] = useState<DSTarget[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
-<<<<<<< HEAD
 
   // Supabase data states
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -96,14 +75,11 @@ const ManagerContent: React.FC = () => {
 
     fetchData();
   }, []);
-=======
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   const [showWDDropdown, setShowWDDropdown] = useState(false);
 
   // Get accessible distributors based on manager's level
   // AM1/AM2 see all distributors, AE sees only their assigned WDs
   const accessibleDistributors = useMemo(() => {
-<<<<<<< HEAD
     if (!currentUser || allDistributors.length === 0) return allDistributors;
 
     // AM1 and AM2 see all distributors
@@ -118,11 +94,6 @@ const ManagerContent: React.FC = () => {
 
     return allDistributors;
   }, [currentUser, allDistributors]);
-=======
-    if (!currentUser) return mockDistributors;
-    return getDistributorsForManager(currentUser.id);
-  }, [currentUser]);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
   // Multi-select WD filter - default to all accessible WDs selected
   const [selectedWDs, setSelectedWDs] = useState<string[]>([]);
@@ -150,7 +121,6 @@ const ManagerContent: React.FC = () => {
   }, [accessibleDistributors]);
 
   // SKU Sales Trend Chart States - use accessible distributors
-<<<<<<< HEAD
   const [skuChartSKUs, setSkuChartSKUs] = useState<string[]>([]);
   const [skuChartWDs, setSkuChartWDs] = useState<string[]>([]);
 
@@ -161,11 +131,6 @@ const ManagerContent: React.FC = () => {
     }
   }, [allSKUs]);
 
-=======
-  const [skuChartSKUs, setSkuChartSKUs] = useState<string[]>(mockSKUs.filter(s => s.isActive).map(s => s.id));
-  const [skuChartWDs, setSkuChartWDs] = useState<string[]>([]);
-
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   // Initialize SKU chart WDs
   React.useEffect(() => {
     setSkuChartWDs(accessibleDistributors.map(d => d.id));
@@ -190,16 +155,9 @@ const ManagerContent: React.FC = () => {
     setExportWDs(initial);
   }, [accessibleDistributors]);
 
-<<<<<<< HEAD
   // Use transactions from Supabase (no more sample data)
   const allTransactions = useMemo(() => {
     return storedTransactions;
-=======
-  // Combine stored transactions with sample data for demo
-  const allTransactions = useMemo(() => {
-    const sampleTxns = generateSampleTransactions();
-    return [...storedTransactions, ...sampleTxns];
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   }, [storedTransactions]);
 
   // Filter transactions by date range AND selected distributors
@@ -212,11 +170,7 @@ const ManagerContent: React.FC = () => {
       const txnDate = new Date(t.timestamp);
       if (txnDate < cutoffDate) return false;
 
-<<<<<<< HEAD
       const salesman = allUsers.find(u => u.id === t.salesmanId);
-=======
-      const salesman = mockUsers.find(u => u.id === t.salesmanId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
       // Filter by selected distributors (which are already limited to accessible ones)
       if (!salesman?.distributorId || !selectedWDs.includes(salesman.distributorId)) {
@@ -225,36 +179,22 @@ const ManagerContent: React.FC = () => {
 
       return true;
     });
-<<<<<<< HEAD
   }, [allTransactions, selectedWDs, selectedDays, allUsers]);
-=======
-  }, [allTransactions, selectedWDs, selectedDays]);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
   // Get salesmen for selected WD (only from accessible distributors)
   const getSalesmenForWD = (wdId: string) => {
     const accessibleWDIds = accessibleDistributors.map(d => d.id);
     if (wdId === 'all') {
-<<<<<<< HEAD
       return allUsers.filter(u => u.role === 'salesman' && accessibleWDIds.includes(u.distributorId || ''));
     }
     return allUsers.filter(u => u.role === 'salesman' && u.distributorId === wdId && accessibleWDIds.includes(wdId));
-=======
-      return mockUsers.filter(u => u.role === 'salesman' && accessibleWDIds.includes(u.distributorId || ''));
-    }
-    return mockUsers.filter(u => u.role === 'salesman' && u.distributorId === wdId && accessibleWDIds.includes(wdId));
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   };
 
   // Calculate sales by SKU
   const salesBySku = useMemo(() => {
     const skuMap: Record<string, { name: string; quantity: number; outlets: number; imageUrl: string }> = {};
 
-<<<<<<< HEAD
     allSKUs.filter(s => s.isActive).forEach(sku => {
-=======
-    mockSKUs.filter(s => s.isActive).forEach(sku => {
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
       skuMap[sku.id] = { name: sku.name, quantity: 0, outlets: 0, imageUrl: sku.imageUrl };
     });
 
@@ -266,11 +206,7 @@ const ManagerContent: React.FC = () => {
     });
 
     return Object.entries(skuMap).map(([id, data]) => ({ id, ...data }));
-<<<<<<< HEAD
   }, [filteredTransactions, allSKUs]);
-=======
-  }, [filteredTransactions]);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
   // Calculate sales by day
   const salesByDay = useMemo(() => {
@@ -303,11 +239,7 @@ const ManagerContent: React.FC = () => {
     const wdSales: Record<string, { id: string; wdCode: string; name: string; sales: number }> = {};
 
     distChartWDs.forEach(wdId => {
-<<<<<<< HEAD
       const wd = allDistributors.find(d => d.id === wdId);
-=======
-      const wd = mockDistributors.find(d => d.id === wdId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
       if (wd) {
         wdSales[wdId] = { id: wdId, wdCode: wd.wdCode, name: wd.name, sales: 0 };
       }
@@ -319,11 +251,7 @@ const ManagerContent: React.FC = () => {
 
       if (distChartSKU !== 'all' && t.skuId !== distChartSKU) return;
 
-<<<<<<< HEAD
       const salesman = allUsers.find(u => u.id === t.salesmanId);
-=======
-      const salesman = mockUsers.find(u => u.id === t.salesmanId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
       if (!salesman?.distributorId) return;
 
       if (wdSales[salesman.distributorId]) {
@@ -332,11 +260,7 @@ const ManagerContent: React.FC = () => {
     });
 
     return Object.values(wdSales);
-<<<<<<< HEAD
   }, [allTransactions, distChartWDs, distChartStartDate, distChartEndDate, distChartSKU, allDistributors, allUsers]);
-=======
-  }, [allTransactions, distChartWDs, distChartStartDate, distChartEndDate, distChartSKU]);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
   // SKU Sales Trend Data (Daily)
   const skuSalesTrendData = useMemo(() => {
@@ -363,11 +287,7 @@ const ManagerContent: React.FC = () => {
 
       if (!skuChartSKUs.includes(t.skuId)) return;
 
-<<<<<<< HEAD
       const salesman = allUsers.find(u => u.id === t.salesmanId);
-=======
-      const salesman = mockUsers.find(u => u.id === t.salesmanId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
       if (!salesman?.distributorId) return;
 
       if (!skuChartWDs.includes(salesman.distributorId)) return;
@@ -383,11 +303,7 @@ const ManagerContent: React.FC = () => {
       date,
       skuData
     }));
-<<<<<<< HEAD
   }, [allTransactions, skuChartSKUs, skuChartWDs, allUsers]);
-=======
-  }, [allTransactions, skuChartSKUs, skuChartWDs]);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
   // Colors for SKU lines
   const skuColors = [
@@ -417,11 +333,7 @@ const ManagerContent: React.FC = () => {
   // Calculate DS performance
   const dsPerformance = useMemo(() => {
     // Get salesmen from all selected WDs
-<<<<<<< HEAD
     const salesmen = allUsers.filter(u => u.role === 'salesman' && selectedWDs.includes(u.distributorId || ''));
-=======
-    const salesmen = mockUsers.filter(u => u.role === 'salesman' && selectedWDs.includes(u.distributorId || ''));
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
     return salesmen.map(salesman => {
       const salesmanTxns = filteredTransactions.filter(t => t.salesmanId === salesman.id);
@@ -432,13 +344,8 @@ const ManagerContent: React.FC = () => {
         .filter(s => s.salesmanId === salesman.id)
         .reduce((sum, s) => sum + s.quantity, 0);
 
-<<<<<<< HEAD
       const tl = allUsers.find(u => u.id === salesman.teamLeaderId);
       const wd = allDistributors.find(d => d.id === salesman.distributorId);
-=======
-      const tl = mockUsers.find(u => u.id === salesman.teamLeaderId);
-      const wd = mockDistributors.find(d => d.id === salesman.distributorId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
       return {
         id: salesman.id,
@@ -487,11 +394,7 @@ const ManagerContent: React.FC = () => {
       const txnDate = new Date(t.timestamp);
       if (txnDate < startDate || txnDate > endDate) return false;
 
-<<<<<<< HEAD
       const salesman = allUsers.find(u => u.id === t.salesmanId);
-=======
-      const salesman = mockUsers.find(u => u.id === t.salesmanId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
       if (!salesman || !selectedWDIds.includes(salesman.distributorId || '')) return false;
 
       return true;
@@ -503,17 +406,10 @@ const ManagerContent: React.FC = () => {
     ];
 
     exportTransactions.forEach(t => {
-<<<<<<< HEAD
       const salesman = allUsers.find(u => u.id === t.salesmanId);
       const tl = allUsers.find(u => u.id === salesman?.teamLeaderId);
       const wd = allDistributors.find(d => d.id === salesman?.distributorId);
       const sku = allSKUs.find(s => s.id === t.skuId);
-=======
-      const salesman = mockUsers.find(u => u.id === t.salesmanId);
-      const tl = mockUsers.find(u => u.id === salesman?.teamLeaderId);
-      const wd = mockDistributors.find(d => d.id === salesman?.distributorId);
-      const sku = mockSKUs.find(s => s.id === t.skuId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
       const txnDate = new Date(t.timestamp);
 
       reportData.push([
@@ -699,7 +595,6 @@ const ManagerContent: React.FC = () => {
   const allWDsSelected = Object.values(exportWDs).every(v => v);
   const someWDsSelected = Object.values(exportWDs).some(v => v);
 
-<<<<<<< HEAD
   if (isLoadingData || isSalesLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -711,8 +606,6 @@ const ManagerContent: React.FC = () => {
     );
   }
 
-=======
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   return (
     <div className="min-h-screen bg-background pb-8">
       {/* Header */}
@@ -906,11 +799,7 @@ const ManagerContent: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Products</SelectItem>
-<<<<<<< HEAD
                   {allSKUs.filter(s => s.isActive).map(sku => (
-=======
-                  {mockSKUs.filter(s => s.isActive).map(sku => (
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                     <SelectItem key={sku.id} value={sku.id}>{sku.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -1019,17 +908,10 @@ const ManagerContent: React.FC = () => {
             <div>
               <Label className="text-xs text-muted-foreground">Select SKUs</Label>
               <Select
-<<<<<<< HEAD
                 value={skuChartSKUs.length === allSKUs.filter(s => s.isActive).length ? 'all' : skuChartSKUs.length === 1 ? skuChartSKUs[0] : 'multiple'}
                 onValueChange={(value) => {
                   if (value === 'all') {
                     setSkuChartSKUs(allSKUs.filter(s => s.isActive).map(s => s.id));
-=======
-                value={skuChartSKUs.length === mockSKUs.filter(s => s.isActive).length ? 'all' : skuChartSKUs.length === 1 ? skuChartSKUs[0] : 'multiple'}
-                onValueChange={(value) => {
-                  if (value === 'all') {
-                    setSkuChartSKUs(mockSKUs.filter(s => s.isActive).map(s => s.id));
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                   } else if (value !== 'multiple') {
                     setSkuChartSKUs([value]);
                   }
@@ -1040,11 +922,7 @@ const ManagerContent: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All SKUs</SelectItem>
-<<<<<<< HEAD
                   {allSKUs.filter(s => s.isActive).map(sku => (
-=======
-                  {mockSKUs.filter(s => s.isActive).map(sku => (
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                     <SelectItem key={sku.id} value={sku.id}>{sku.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -1080,13 +958,8 @@ const ManagerContent: React.FC = () => {
           {/* Line Chart Legend */}
           <div className="flex flex-wrap gap-2 mb-3">
             {skuChartSKUs.map((skuId) => {
-<<<<<<< HEAD
               const sku = allSKUs.find(s => s.id === skuId);
               const index = allSKUs.filter(s => s.isActive).findIndex(s => s.id === skuId);
-=======
-              const sku = mockSKUs.find(s => s.id === skuId);
-              const index = mockSKUs.filter(s => s.isActive).findIndex(s => s.id === skuId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
               return sku ? (
                 <div key={skuId} className="flex items-center gap-1">
                   <div
@@ -1136,11 +1009,7 @@ const ManagerContent: React.FC = () => {
 
                     {/* Lines and points for each SKU */}
                     {skuChartSKUs.map((skuId) => {
-<<<<<<< HEAD
                       const skuIndex = allSKUs.filter(s => s.isActive).findIndex(s => s.id === skuId);
-=======
-                      const skuIndex = mockSKUs.filter(s => s.isActive).findIndex(s => s.id === skuId);
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                       const color = skuColors[skuIndex % skuColors.length];
 
                       // Calculate points
@@ -1661,8 +1530,4 @@ const ManagerAuthWrapper: React.FC<{ onReady: () => void }> = ({ onReady }) => {
   return <ManagerContent />;
 };
 
-<<<<<<< HEAD
 export default ManagerDashboard;
-=======
-export default ManagerDashboard;
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c

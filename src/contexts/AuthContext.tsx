@@ -5,16 +5,10 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface AuthContextType {
   currentUser: User | null;
-<<<<<<< HEAD
   loginByName: (name: string, roleType: 'manager' | 'team_leader') => Promise<User | null>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
-=======
-  loginByName: (name: string, roleType: 'manager' | 'team_leader') => User | null;
-  logout: () => void;
-  isAuthenticated: boolean;
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
   rememberedUsers: { name: string; roleType: 'manager' | 'team_leader' }[];
   addRememberedUser: (name: string, roleType: 'manager' | 'team_leader') => void;
 }
@@ -26,43 +20,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [sessionUserId, setSessionUserId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       return sessionStorage.getItem('currentUserId');
-<<<<<<< HEAD
-=======
-    }
-    return null;
-  });
-
-  // Local storage for remembered users (persists)
-  const [rememberedUsers, setRememberedUsers] = useLocalStorage<{ name: string; roleType: 'manager' | 'team_leader' }[]>('rememberedUsers', []);
-
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  // Restore session on mount
-  useEffect(() => {
-    if (sessionUserId) {
-      const user = mockUsers.find(u => u.id === sessionUserId);
-      if (user) {
-        setCurrentUser(user);
-      }
-    }
-  }, [sessionUserId]);
-
-  const loginByName = (name: string, roleType: 'manager' | 'team_leader'): User | null => {
-    // Find user by name and role type (case-insensitive)
-    const normalizedName = name.trim().toLowerCase();
-    const user = mockUsers.find(u => {
-      const matchesName = u.name.toLowerCase() === normalizedName;
-      const matchesRole = u.role === roleType;
-      return matchesName && matchesRole;
-    });
-
-    if (user) {
-      setCurrentUser(user);
-      setSessionUserId(user.id);
-      sessionStorage.setItem('currentUserId', user.id);
-      addRememberedUser(name, roleType);
-      return user;
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
     }
     return null;
   });
@@ -129,10 +86,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       loginByName,
       logout,
       isAuthenticated: !!currentUser,
-<<<<<<< HEAD
       isLoading,
-=======
->>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
       rememberedUsers,
       addRememberedUser,
     }}>
