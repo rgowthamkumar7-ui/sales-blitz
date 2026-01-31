@@ -1,129 +1,317 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { User, ChevronDown, AlertCircle, Users, Briefcase, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useHapticFeedback } from '@/hooks/useHapticFeedback';
-import { cn } from '@/lib/utils';
+import { userService } from '@/services/userService';
+import { User as UserType } from '@/types';
 
 interface PinLoginProps {
-  onSuccess: () => void;
+    onSuccess: () => void;
+    allowedRoles?: ('team_leader' | 'manager')[];
 }
 
-const PinLogin: React.FC<PinLoginProps> = ({ onSuccess }) => {
-  const [pin, setPin] = useState('');
-  const [error, setError] = useState(false);
-  const { login } = useAuth();
-  const { lightTap, errorPattern, successPattern } = useHapticFeedback();
+type RoleType = 'manager' | 'team_leader';
 
-  const handleDigitPress = (digit: string) => {
-    if (pin.length < 4) {
-      lightTap();
-      setPin(prev => prev + digit);
-      setError(false);
+const PinLogin: React.FC<PinLoginProps> = ({
+    onSuccess,
+    allowedRoles = ['team_leader', 'manager']
+}) => {
+    const { loginByName, rememberedUsers } = useAuth();
+    const [selectedRoleType, setSelectedRoleType] = useState<RoleType | null>(null);
+    const [selectedName, setSelectedName] = useState<string>('');
+    const [showNameDropdown, setShowNameDropdown] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+    const [availableUsers, setAvailableUsers] = useState<UserType[]>([]);
+
+    // Fetch users when role type changes
+    useEffect(() => {
+        const fetchUsers = async () => {
+            if (!selectedRoleType) {
+                setAvailableUsers([]);
+                return;
+            }
+
+            setIsLoadingUsers(true);
+            try {
+                if (selectedRoleType === 'manager') {
+                    const managers = await userService.getManagers();
+                    setAvailableUsers(managers);
+                } else {
+                    const teamLeaders = await userService.getTeamLeaders();
+                    setAvailableUsers(teamLeaders);
+                }
+            } catch (err) {
+                console.error('Failed to fetch users:', err);
+                setError('Failed to load users. Please try again.');
+            } finally {
+                setIsLoadingUsers(false);
+            }
+        };
+
+        fetchUsers();
+    }, [selectedRoleType]);
+
+    // Sort users alphabetically
+    const sortedUsers = useMemo(() => {
+        return [...availableUsers].sort((a, b) => a.name.localeCompare(b.name));
+    }, [availableUsers]);
+
+    // Filter by allowed roles
+    const showManagerOption = allowedRoles.includes('manager');
+    const showTeamLeaderOption = allowedRoles.includes('team_leader');
+
+    const handleRoleSelect = (roleType: RoleType) => {
+        setSelectedRoleType(roleType);
+        setSelectedName('');
+        setError(null);
+    };
+
+    const handleNameSelect = (name: string) => {
+        setSelectedName(name);
+        setShowNameDropdown(false);
+        setError(null);
+    };
+
+    const handleLogin = async () => {
+        if (!selectedRoleType) {
+            setError('Please select your role first');
+            return;
+        }
+        if (!selectedName) {
+            setError('Please select your name');
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const user = await loginByName(selectedName, selectedRoleType);
+            if (user) {
+                onSuccess();
+            } else {
+                setError('User not found. Please check your selection.');
+            }
+        } catch (err) {
+            console.error('Login failed:', err);
+            setError('Login failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Role selection step
+    if (!selectedRoleType) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full max-w-sm"
+                >
+                    <Card className="p-6 shadow-2xl backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
+                        {/* Logo/Header */}
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                <User className="w-10 h-10 text-white" />
+                            </div>
+                            <h1 className="text-2xl font-bold text-foreground">Sales Blitz</h1>
+                            <p className="text-sm text-muted-foreground mt-2">
+                                Who are you?
+                            </p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* AE/AM Option */}
+                            {showManagerOption && (
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleRoleSelect('manager')}
+                                    className="w-full p-4 rounded-xl border-2 border-transparent bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 hover:border-emerald-500 transition-all flex items-center gap-4"
+                                >
+                                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
+                                        <Briefcase className="w-7 h-7 text-white" />
+                                    </div>
+                                    <div className="text-left flex-1">
+                                        <p className="font-bold text-lg text-foreground">AE / AM</p>
+                                        <p className="text-sm text-muted-foreground">Area Executive / Area Manager</p>
+                                    </div>
+                                    <ChevronDown className="w-5 h-5 text-muted-foreground rotate-[-90deg]" />
+                                </motion.button>
+                            )}
+
+                            {/* Team Leader Option */}
+                            {showTeamLeaderOption && (
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleRoleSelect('team_leader')}
+                                    className="w-full p-4 rounded-xl border-2 border-transparent bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 hover:border-indigo-500 transition-all flex items-center gap-4"
+                                >
+                                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
+                                        <Users className="w-7 h-7 text-white" />
+                                    </div>
+                                    <div className="text-left flex-1">
+                                        <p className="font-bold text-lg text-foreground">Team Leader</p>
+                                        <p className="text-sm text-muted-foreground">Manage your sales team</p>
+                                    </div>
+                                    <ChevronDown className="w-5 h-5 text-muted-foreground rotate-[-90deg]" />
+                                </motion.button>
+                            )}
+                        </div>
+                    </Card>
+                </motion.div>
+            </div>
+        );
     }
-  };
 
-  const handleDelete = () => {
-    lightTap();
-    setPin(prev => prev.slice(0, -1));
-    setError(false);
-  };
+    // Name selection step
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full max-w-sm"
+            >
+                <Card className="p-6 shadow-2xl backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
+                    {/* Header with back button */}
+                    <div className="flex items-center gap-3 mb-6">
+                        <button
+                            onClick={() => {
+                                setSelectedRoleType(null);
+                                setSelectedName('');
+                                setError(null);
+                            }}
+                            className="p-2 rounded-lg hover:bg-muted transition-colors"
+                        >
+                            <ChevronDown className="w-5 h-5 rotate-90 text-muted-foreground" />
+                        </button>
+                        <div>
+                            <p className="text-sm text-muted-foreground">
+                                {selectedRoleType === 'manager' ? 'AE / AM Login' : 'Team Leader Login'}
+                            </p>
+                            <h2 className="text-xl font-bold text-foreground">Select Your Name</h2>
+                        </div>
+                    </div>
 
-  const handleClear = () => {
-    lightTap();
-    setPin('');
-    setError(false);
-  };
+                    <div className="space-y-4">
+                        {/* Name Dropdown */}
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setShowNameDropdown(!showNameDropdown)}
+                                disabled={isLoadingUsers}
+                                className="w-full p-4 rounded-xl border-2 bg-background hover:border-primary/50 transition-all flex items-center justify-between text-left disabled:opacity-50"
+                            >
+                                <div className="flex items-center gap-3">
+                                    {isLoadingUsers ? (
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-muted">
+                                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                                        </div>
+                                    ) : (
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${selectedRoleType === 'manager'
+                                            ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                                            : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                                            }`}>
+                                            {selectedName ? selectedName.charAt(0).toUpperCase() : '?'}
+                                        </div>
+                                    )}
+                                    <span className={`font-medium ${selectedName ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                        {isLoadingUsers ? 'Loading...' : (selectedName || 'Choose your name...')}
+                                    </span>
+                                </div>
+                                <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${showNameDropdown ? 'rotate-180' : ''}`} />
+                            </button>
 
-  useEffect(() => {
-    if (pin.length === 4) {
-      const user = login(pin);
-      if (user) {
-        successPattern();
-        setTimeout(onSuccess, 300);
-      } else {
-        errorPattern();
-        setError(true);
-        setTimeout(() => {
-          setPin('');
-          setError(false);
-        }, 500);
-      }
-    }
-  }, [pin, login, onSuccess, successPattern, errorPattern]);
+                            {/* Dropdown List */}
+                            <AnimatePresence>
+                                {showNameDropdown && !isLoadingUsers && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="absolute z-10 w-full mt-2 bg-background border rounded-xl shadow-lg max-h-64 overflow-y-auto"
+                                    >
+                                        {sortedUsers.length === 0 ? (
+                                            <div className="p-4 text-center text-muted-foreground">
+                                                No users found
+                                            </div>
+                                        ) : (
+                                            sortedUsers.map((user) => (
+                                                <button
+                                                    key={user.id}
+                                                    onClick={() => handleNameSelect(user.name)}
+                                                    className="w-full px-4 py-3 text-left hover:bg-muted transition-colors flex items-center gap-3 border-b last:border-b-0"
+                                                >
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${selectedRoleType === 'manager'
+                                                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                                                        : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                                                        }`}>
+                                                        {user.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-sm text-foreground">{user.name}</p>
+                                                        {user.managerLevel && (
+                                                            <p className="text-xs text-muted-foreground">{user.managerLevel}</p>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            ))
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
 
-  const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'];
+                        {/* Error */}
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex items-center gap-2 text-destructive text-sm p-3 bg-destructive/10 rounded-lg"
+                            >
+                                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                                <span>{error}</span>
+                            </motion.div>
+                        )}
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
-      >
-        <h1 className="text-3xl font-bold text-foreground mb-2">Sales Punch</h1>
-        <p className="text-muted-foreground">Enter your 4-digit PIN</p>
-      </motion.div>
+                        {/* Login Button */}
+                        <Button
+                            onClick={handleLogin}
+                            className={`w-full h-12 text-lg font-semibold ${selectedRoleType === 'manager'
+                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700'
+                                : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                                }`}
+                            disabled={!selectedName || isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    Logging in...
+                                </>
+                            ) : (
+                                'Continue'
+                            )}
+                        </Button>
 
-      {/* PIN Dots */}
-      <div className="flex gap-4 mb-8">
-        {[0, 1, 2, 3].map(i => (
-          <motion.div
-            key={i}
-            animate={error ? { x: [-5, 5, -5, 5, 0] } : {}}
-            transition={{ duration: 0.3 }}
-            className={cn(
-              "w-4 h-4 rounded-full border-2 transition-all duration-200",
-              pin.length > i 
-                ? error 
-                  ? "bg-destructive border-destructive" 
-                  : "bg-primary border-primary"
-                : "border-muted-foreground"
-            )}
-          />
-        ))}
-      </div>
-
-      <AnimatePresence>
-        {error && (
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="text-destructive text-sm mb-4"
-          >
-            Invalid PIN. Please try again.
-          </motion.p>
-        )}
-      </AnimatePresence>
-
-      {/* Numpad */}
-      <div className="grid grid-cols-3 gap-4 max-w-xs w-full">
-        {digits.map(digit => (
-          <motion.button
-            key={digit}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              if (digit === 'C') handleClear();
-              else if (digit === '⌫') handleDelete();
-              else handleDigitPress(digit);
-            }}
-            className={cn(
-              "h-16 rounded-xl text-2xl font-semibold transition-colors touch-manipulation",
-              digit === 'C' || digit === '⌫'
-                ? "bg-muted text-muted-foreground"
-                : "bg-card text-card-foreground shadow-sm border border-border hover:bg-accent"
-            )}
-          >
-            {digit}
-          </motion.button>
-        ))}
-      </div>
-
-      <p className="mt-8 text-xs text-muted-foreground">
-        Demo PINs: 1234, 2345, 3456, 4567, 5678
-      </p>
-    </div>
-  );
+                        {/* User count info */}
+                        <div className="text-center pt-2">
+                            <p className="text-xs text-muted-foreground">
+                                {isLoadingUsers ? 'Loading...' : `${sortedUsers.length} ${selectedRoleType === 'manager' ? 'AEs/AMs' : 'Team Leaders'} available`}
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            </motion.div>
+        </div>
+    );
 };
 
 export default PinLogin;
