@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronDown, AlertCircle, Users, Briefcase, Loader2 } from 'lucide-react';
@@ -6,6 +7,15 @@ import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/services/userService';
 import { User as UserType } from '@/types';
+=======
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, ChevronDown, AlertCircle, Users, Briefcase } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { mockUsers, getAEsAndAMs, getTeamLeaders } from '@/data/mockData';
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
 
 interface PinLoginProps {
     onSuccess: () => void;
@@ -23,6 +33,7 @@ const PinLogin: React.FC<PinLoginProps> = ({
     const [selectedName, setSelectedName] = useState<string>('');
     const [showNameDropdown, setShowNameDropdown] = useState(false);
     const [error, setError] = useState<string | null>(null);
+<<<<<<< HEAD
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
     const [availableUsers, setAvailableUsers] = useState<UserType[]>([]);
@@ -53,6 +64,16 @@ const PinLogin: React.FC<PinLoginProps> = ({
         };
 
         fetchUsers();
+=======
+
+    // Get users based on selected role type
+    const availableUsers = useMemo(() => {
+        if (!selectedRoleType) return [];
+        if (selectedRoleType === 'manager') {
+            return getAEsAndAMs();
+        }
+        return getTeamLeaders();
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
     }, [selectedRoleType]);
 
     // Sort users alphabetically
@@ -76,7 +97,11 @@ const PinLogin: React.FC<PinLoginProps> = ({
         setError(null);
     };
 
+<<<<<<< HEAD
     const handleLogin = async () => {
+=======
+    const handleLogin = () => {
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
         if (!selectedRoleType) {
             setError('Please select your role first');
             return;
@@ -86,6 +111,7 @@ const PinLogin: React.FC<PinLoginProps> = ({
             return;
         }
 
+<<<<<<< HEAD
         setIsLoading(true);
         setError(null);
 
@@ -101,6 +127,13 @@ const PinLogin: React.FC<PinLoginProps> = ({
             setError('Login failed. Please try again.');
         } finally {
             setIsLoading(false);
+=======
+        const user = loginByName(selectedName, selectedRoleType);
+        if (user) {
+            onSuccess();
+        } else {
+            setError('User not found. Please check your selection.');
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
         }
     };
 
@@ -207,6 +240,7 @@ const PinLogin: React.FC<PinLoginProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setShowNameDropdown(!showNameDropdown)}
+<<<<<<< HEAD
                                 disabled={isLoadingUsers}
                                 className="w-full p-4 rounded-xl border-2 bg-background hover:border-primary/50 transition-all flex items-center justify-between text-left disabled:opacity-50"
                             >
@@ -225,6 +259,19 @@ const PinLogin: React.FC<PinLoginProps> = ({
                                     )}
                                     <span className={`font-medium ${selectedName ? 'text-foreground' : 'text-muted-foreground'}`}>
                                         {isLoadingUsers ? 'Loading...' : (selectedName || 'Choose your name...')}
+=======
+                                className="w-full p-4 rounded-xl border-2 bg-background hover:border-primary/50 transition-all flex items-center justify-between text-left"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${selectedRoleType === 'manager'
+                                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                                        : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                                        }`}>
+                                        {selectedName ? selectedName.charAt(0).toUpperCase() : '?'}
+                                    </div>
+                                    <span className={`font-medium ${selectedName ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                        {selectedName || 'Choose your name...'}
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                                     </span>
                                 </div>
                                 <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${showNameDropdown ? 'rotate-180' : ''}`} />
@@ -232,13 +279,18 @@ const PinLogin: React.FC<PinLoginProps> = ({
 
                             {/* Dropdown List */}
                             <AnimatePresence>
+<<<<<<< HEAD
                                 {showNameDropdown && !isLoadingUsers && (
+=======
+                                {showNameDropdown && (
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                                     <motion.div
                                         initial={{ opacity: 0, y: -10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         className="absolute z-10 w-full mt-2 bg-background border rounded-xl shadow-lg max-h-64 overflow-y-auto"
                                     >
+<<<<<<< HEAD
                                         {sortedUsers.length === 0 ? (
                                             <div className="p-4 text-center text-muted-foreground">
                                                 No users found
@@ -265,6 +317,28 @@ const PinLogin: React.FC<PinLoginProps> = ({
                                                 </button>
                                             ))
                                         )}
+=======
+                                        {sortedUsers.map((user) => (
+                                            <button
+                                                key={user.id}
+                                                onClick={() => handleNameSelect(user.name)}
+                                                className="w-full px-4 py-3 text-left hover:bg-muted transition-colors flex items-center gap-3 border-b last:border-b-0"
+                                            >
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${selectedRoleType === 'manager'
+                                                    ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                                                    : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                                                    }`}>
+                                                    {user.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-sm text-foreground">{user.name}</p>
+                                                    {user.managerLevel && (
+                                                        <p className="text-xs text-muted-foreground">{user.managerLevel}</p>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        ))}
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -289,6 +363,7 @@ const PinLogin: React.FC<PinLoginProps> = ({
                                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700'
                                 : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
                                 }`}
+<<<<<<< HEAD
                             disabled={!selectedName || isLoading}
                         >
                             {isLoading ? (
@@ -299,12 +374,21 @@ const PinLogin: React.FC<PinLoginProps> = ({
                             ) : (
                                 'Continue'
                             )}
+=======
+                            disabled={!selectedName}
+                        >
+                            Continue
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                         </Button>
 
                         {/* User count info */}
                         <div className="text-center pt-2">
                             <p className="text-xs text-muted-foreground">
+<<<<<<< HEAD
                                 {isLoadingUsers ? 'Loading...' : `${sortedUsers.length} ${selectedRoleType === 'manager' ? 'AEs/AMs' : 'Team Leaders'} available`}
+=======
+                                {sortedUsers.length} {selectedRoleType === 'manager' ? 'AEs/AMs' : 'Team Leaders'} available
+>>>>>>> 91d69597fce6244da13b3b6b325eef99d1452b9c
                             </p>
                         </div>
                     </div>
