@@ -12,6 +12,7 @@ import { userService } from '@/services/userService';
 import { skuService } from '@/services/skuService';
 import { User, SKU } from '@/types';
 import PinLogin from '@/components/salesman/PinLogin';
+import AnalysisPopup from '@/components/manager/AnalysisPopup';
 
 type ViewState = 'home' | 'salesman-list' | 'entry';
 
@@ -32,6 +33,10 @@ const TeamLeaderContent: React.FC = () => {
   const [mappedOutletsInput, setMappedOutletsInput] = useState<string>('');
   const [isEditingMappedOutlets, setIsEditingMappedOutlets] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Analysis Popup State
+  const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
+  const [missingSKUs, setMissingSKUs] = useState<SKU[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     return new Date().toISOString().split('T')[0];
   });
@@ -108,6 +113,55 @@ const TeamLeaderContent: React.FC = () => {
   const handleSelectSalesman = (salesman: User) => {
     setSelectedSalesman(salesman);
 
+    // Get mapped outlets
+    const mappedOutlets = getSalesmanMappedOutlets(salesman.id);
+    setMappedOutletsInput(mappedOutlets > 0 ? mappedOutlets.toString() : '');
+
+    // CHECK FOR ANALYSIS (After 5th of month)
+    const today = new Date();
+    // Use selectedDate effectively if it's "today" or generally always check relative to "today" for the alert?
+    // Requirement: "This should start after 5th of every month"
+    // Requirement: "For last 3 days"
+
+    // We should check if the CURRENT day is > 5th
+    const currentDayOfMonth = today.getDate();
+
+    if (currentDayOfMonth > 5) {
+      // Calculate last 3 days range
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(today.getDate() - 3);
+      const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
+      const todayStr = today.toISOString().split('T')[0];
+
+      // Get all transactions for this salesman in the last 30 days (already in context)
+      // Filter for last 3 days
+      const recentSales = transactions.filter(t => {
+        const tDateStr = new Date(t.timestamp).toISOString().split('T')[0];
+        return t.salesmanId === salesman.id && tDateStr >= threeDaysAgoStr && tDateStr <= todayStr;
+      });
+
+      // Find SKUs with NO sales in this period
+      const missing = activeSKUs.filter(sku => {
+        const skuSales = recentSales.filter(t => t.skuId === sku.id);
+        const totalQty = skuSales.reduce((sum, t) => sum + t.quantity, 0);
+        return totalQty === 0;
+      });
+
+      if (missing.length > 0) {
+        setMissingSKUs(missing);
+        setShowAnalysisPopup(true);
+        // Don't set view to 'entry' yet, wait for popup close
+      } else {
+        // No missing SKUs, proceed to entry
+        prepareEntryView(salesman);
+      }
+    } else {
+      // Before 5th, proceed directly
+      prepareEntryView(salesman);
+    }
+  };
+
+  function prepareEntryView(salesman: User) {
     // Pre-fill with existing data if available
     const existingSales = getSalesmanSalesForDate(salesman.id, selectedDate);
     const inputs: Record<string, { packs: string; outlets: string }> = {};
@@ -118,11 +172,6 @@ const TeamLeaderContent: React.FC = () => {
       };
     });
     setSalesInputs(inputs);
-
-    // Get mapped outlets
-    const mappedOutlets = getSalesmanMappedOutlets(salesman.id);
-    setMappedOutletsInput(mappedOutlets > 0 ? mappedOutlets.toString() : '');
-
     setShowSuccess(false);
     setView('entry');
   };
@@ -156,6 +205,19 @@ const TeamLeaderContent: React.FC = () => {
 
     setIsSaving(true);
     try {
+      // Validate entries
+      for (const sku of activeSKUs) {
+        const packs = parseInt(salesInputs[sku.id]?.packs || '0', 10);
+        const outlets = parseInt(salesInputs[sku.id]?.outlets || '0', 10);
+
+        // Validation: If one is > 0, other MUST be > 0
+        if ((packs > 0 && outlets === 0) || (packs === 0 && outlets > 0)) {
+          alert(`Error for SKU ${sku.name}: Cannot have tickets without outlets or vice versa.`);
+          setIsSaving(false);
+          return;
+        }
+      }
+
       // Prepare entries
       const entries = activeSKUs.map(sku => ({
         skuId: sku.id,
@@ -575,6 +637,21 @@ const TeamLeaderContent: React.FC = () => {
   }
 
   // ENTRY VIEW
+  // Analysis Popup
+  if (showAnalysisPopup && selectedSalesman) {
+    return (
+      <AnalysisPopup
+        isOpen={showAnalysisPopup}
+        onClose={() => {
+          setShowAnalysisPopup(false);
+          prepareEntryView(selectedSalesman);
+        }}
+        missingSKUs={missingSKUs}
+        salesmanName={selectedSalesman.name}
+      />
+    );
+  }
+
   if (!selectedSalesman) return null;
 
   const prevDaySales = getPreviousDaySales(selectedSalesman.id);
