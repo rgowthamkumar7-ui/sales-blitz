@@ -1,0 +1,81 @@
+﻿Total rows: 50
+
+=== First few rows ===
+[
+  {
+    "WD Code": "MU3680",
+    "TL Id": 4820,
+    "TL Name": "DILIP_MU3680",
+    "DS Id": 18912,
+    "DS Name": "HANUMAN GUPTA"
+  },
+  {
+    "WD Code": "MU3680",
+    "TL Id": 4820,
+    "TL Name": "DILIP_MU3680",
+    "DS Id": 18645,
+    "DS Name": "RAKESH YADAV"
+  },
+  {
+    "WD Code": "MU3680",
+    "TL Id": 4820,
+    "TL Name": "DILIP_MU3680",
+    "DS Id": 18908,
+    "DS Name": "VINOD GUPTA"
+  },
+  {
+    "WD Code": "MU3680",
+    "TL Id": 4820,
+    "TL Name": "DILIP_MU3680",
+    "DS Id": 18920,
+    "DS Name": "GHANSHYAM GUPTA"
+  },
+  {
+    "WD Code": "MU3680",
+    "TL Id": 4820,
+    "TL Name": "DILIP_MU3680",
+    "DS Id": 20417030,
+    "DS Name": "RAJENDRA DUBEY"
+  }
+]
+
+=== Column Headers ===
+[ 'WD Code', 'TL Id', 'TL Name', 'DS Id', 'DS Name' ]
+
+=== TL to DS Mapping Summary ===
+
+395 ASLAM:
+  Distributors: 
+  Salesmen (6): AJAY GUPTA, ARUN JAISWAL, DILIP AGARWAL, JAYPRAKASH, KATYA (OPL), OM PRAKASH 1
+
+96 NAZIR(OPL) 1:
+  Distributors: 
+  Salesmen (4): GUDDU, KAMLA 1, PATIL, SHYAMLAL
+
+ABBAS:
+  Distributors: 
+  Salesmen (7): MUNNALAL 2, SAROJ, SUMIT, BM YADAV, RAHUL GUPTA, SHUBHAM, SHIVKUMAR
+
+DILIP_MU3680:
+  Distributors: 
+  Salesmen (7): HANUMAN GUPTA, RAKESH YADAV, VINOD GUPTA, GHANSHYAM GUPTA, RAJENDRA DUBEY, SWD, ALTAF
+
+IMRAN:
+  Distributors: 
+  Salesmen (5): DHIRAJ KASHYAP (OPL), PRASHANT 2, RAMASHANKAR, SHAILENDRA, SURESH KANT KASHYUP
+
+PRAVEEN_MU3573:
+  Distributors: 
+  Salesmen (6): SURESH GONGE, BASANT, S.K GUPTA, ALOK, PRAKASH, VIJAY GUPTA
+
+SHAILENDRA GUPTA:
+  Distributors: 
+  Salesmen (7): RUPENDRA, SIYARAM, SANTOSH JAISWAL, OMPRAKASH, A.K.GUPTA, MUKESH GUPTA, VIRENDRA
+
+UMASHANKAR SINGH:
+  Distributors: 
+  Salesmen (8): KAMLA, SP CHOUDARY, KB GUPTA, PRADEEP JAISWAL, PINTOO GUPTA, SHEESHNATH, ANIL, SWD
+
+=== Statistics ===
+Total TLs: 8
+Total unique DS entries: 50

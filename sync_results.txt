@@ -1,0 +1,155 @@
+﻿[dotenv@17.2.4] injecting env (2) from .env -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+=== Starting TL-DS Mapping Sync ===
+
+Found 50 rows in Excel file
+
+Found 130 users in database
+
+TLs in DB: 46
+DSs in DB: 200
+Distributors in DB: 0
+
+=== Mapping Summary ===
+
+Total updates to process: 48
+
+ΓÜá∩╕Å  DSs not found in database:
+  - SWD (ID: 20415548)
+  - SWD (ID: 20415547)
+
+=== Updates by TL ===
+
+395 ASLAM (6 salesmen):
+  Γ£ô AJAY GUPTA - TL: f6145d6d-3b7f-465a-86a5-09ec0bf583cf ΓåÆ f6145d6d-3b7f-465a-86a5-09ec0bf583cf, Dist: Γ£ô
+  Γ£ô ARUN JAISWAL - TL: f6145d6d-3b7f-465a-86a5-09ec0bf583cf ΓåÆ f6145d6d-3b7f-465a-86a5-09ec0bf583cf, Dist: Γ£ô
+  Γ£ô DILIP AGARWAL - TL: f6145d6d-3b7f-465a-86a5-09ec0bf583cf ΓåÆ f6145d6d-3b7f-465a-86a5-09ec0bf583cf, Dist: Γ£ô
+  Γ£ô JAYPRAKASH - TL: f6145d6d-3b7f-465a-86a5-09ec0bf583cf ΓåÆ f6145d6d-3b7f-465a-86a5-09ec0bf583cf, Dist: Γ£ô
+  Γ£ô KATYA (OPL) - TL: f6145d6d-3b7f-465a-86a5-09ec0bf583cf ΓåÆ f6145d6d-3b7f-465a-86a5-09ec0bf583cf, Dist: Γ£ô
+  Γ£ô OM PRAKASH 1 - TL: f6145d6d-3b7f-465a-86a5-09ec0bf583cf ΓåÆ f6145d6d-3b7f-465a-86a5-09ec0bf583cf, Dist: Γ£ô
+
+96 NAZIR(OPL) 1 (4 salesmen):
+  Γ£ô GUDDU - TL: 903d7cfc-4c09-42f2-ba7e-a841e5232eca ΓåÆ 903d7cfc-4c09-42f2-ba7e-a841e5232eca, Dist: Γ£ô
+  Γ£ô KAMLA 1 - TL: 903d7cfc-4c09-42f2-ba7e-a841e5232eca ΓåÆ 903d7cfc-4c09-42f2-ba7e-a841e5232eca, Dist: Γ£ô
+  Γ£ô PATIL - TL: 903d7cfc-4c09-42f2-ba7e-a841e5232eca ΓåÆ 903d7cfc-4c09-42f2-ba7e-a841e5232eca, Dist: Γ£ô
+  Γ£ô SHYAMLAL - TL: 903d7cfc-4c09-42f2-ba7e-a841e5232eca ΓåÆ 903d7cfc-4c09-42f2-ba7e-a841e5232eca, Dist: Γ£ô
+
+ABBAS (7 salesmen):
+  Γ£ô MUNNALAL 2 - TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d ΓåÆ 29ff86f2-999b-4af4-b048-96a1ae6c9e2d, Dist: Γ£ô
+  Γ£ô SAROJ - TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d ΓåÆ 29ff86f2-999b-4af4-b048-96a1ae6c9e2d, Dist: Γ£ô
+  Γ£ô SUMIT - TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d ΓåÆ 29ff86f2-999b-4af4-b048-96a1ae6c9e2d, Dist: Γ£ô
+  Γ£ô BM YADAV - TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d ΓåÆ 29ff86f2-999b-4af4-b048-96a1ae6c9e2d, Dist: Γ£ô
+  Γ£ô RAHUL GUPTA - TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d ΓåÆ 29ff86f2-999b-4af4-b048-96a1ae6c9e2d, Dist: Γ£ô
+  Γ£ô SHUBHAM - TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d ΓåÆ 29ff86f2-999b-4af4-b048-96a1ae6c9e2d, Dist: Γ£ô
+  Γ£ô SHIVKUMAR - TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d ΓåÆ 29ff86f2-999b-4af4-b048-96a1ae6c9e2d, Dist: Γ£ô
+
+DILIP_MU3680 (6 salesmen):
+  Γ£ô HANUMAN GUPTA - TL: bc30e683-e9dc-4879-b629-142e7c6e8f04 ΓåÆ bc30e683-e9dc-4879-b629-142e7c6e8f04, Dist: Γ£ô
+  Γ£ô RAKESH YADAV - TL: bc30e683-e9dc-4879-b629-142e7c6e8f04 ΓåÆ bc30e683-e9dc-4879-b629-142e7c6e8f04, Dist: Γ£ô
+  Γ£ô VINOD GUPTA - TL: bc30e683-e9dc-4879-b629-142e7c6e8f04 ΓåÆ bc30e683-e9dc-4879-b629-142e7c6e8f04, Dist: Γ£ô
+  Γ£ô GHANSHYAM GUPTA - TL: bc30e683-e9dc-4879-b629-142e7c6e8f04 ΓåÆ bc30e683-e9dc-4879-b629-142e7c6e8f04, Dist: Γ£ô
+  Γ£ô RAJENDRA DUBEY - TL: bc30e683-e9dc-4879-b629-142e7c6e8f04 ΓåÆ bc30e683-e9dc-4879-b629-142e7c6e8f04, Dist: Γ£ô
+  Γ£ô ALTAF - TL: bc30e683-e9dc-4879-b629-142e7c6e8f04 ΓåÆ bc30e683-e9dc-4879-b629-142e7c6e8f04, Dist: Γ£ô
+
+IMRAN (5 salesmen):
+  Γ£ô DHIRAJ KASHYAP (OPL) - TL: f04e87e8-d4c2-4f75-974c-14762975fe24 ΓåÆ f04e87e8-d4c2-4f75-974c-14762975fe24, Dist: Γ£ô
+  Γ£ô PRASHANT 2 - TL: f04e87e8-d4c2-4f75-974c-14762975fe24 ΓåÆ f04e87e8-d4c2-4f75-974c-14762975fe24, Dist: Γ£ô
+  Γ£ô RAMASHANKAR - TL: f04e87e8-d4c2-4f75-974c-14762975fe24 ΓåÆ f04e87e8-d4c2-4f75-974c-14762975fe24, Dist: Γ£ô
+  Γ£ô SHAILENDRA - TL: f04e87e8-d4c2-4f75-974c-14762975fe24 ΓåÆ f04e87e8-d4c2-4f75-974c-14762975fe24, Dist: Γ£ô
+  Γ£ô SURESH KANT KASHYUP - TL: f04e87e8-d4c2-4f75-974c-14762975fe24 ΓåÆ f04e87e8-d4c2-4f75-974c-14762975fe24, Dist: Γ£ô
+
+PRAVEEN_MU3573 (6 salesmen):
+  Γ£ô SURESH GONGE - TL: 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4 ΓåÆ 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4, Dist: Γ£ô
+  Γ£ô BASANT - TL: 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4 ΓåÆ 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4, Dist: Γ£ô
+  Γ£ô S.K GUPTA - TL: 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4 ΓåÆ 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4, Dist: Γ£ô
+  Γ£ô ALOK - TL: 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4 ΓåÆ 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4, Dist: Γ£ô
+  Γ£ô PRAKASH - TL: 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4 ΓåÆ 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4, Dist: Γ£ô
+  Γ£ô VIJAY GUPTA - TL: 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4 ΓåÆ 7819e242-a2cf-46ae-bfc4-4f77e0c6a4f4, Dist: Γ£ô
+
+SHAILENDRA GUPTA (7 salesmen):
+  Γ£ô RUPENDRA - TL: 2c7fb974-d045-495b-b621-e5bd6ec4d2c2 ΓåÆ 2c7fb974-d045-495b-b621-e5bd6ec4d2c2, Dist: Γ£ô
+  Γ£ô SIYARAM - TL: 2c7fb974-d045-495b-b621-e5bd6ec4d2c2 ΓåÆ 2c7fb974-d045-495b-b621-e5bd6ec4d2c2, Dist: Γ£ô
+  Γ£ô SANTOSH JAISWAL - TL: 2c7fb974-d045-495b-b621-e5bd6ec4d2c2 ΓåÆ 2c7fb974-d045-495b-b621-e5bd6ec4d2c2, Dist: Γ£ô
+  Γ£ô OMPRAKASH - TL: 2c7fb974-d045-495b-b621-e5bd6ec4d2c2 ΓåÆ 2c7fb974-d045-495b-b621-e5bd6ec4d2c2, Dist: Γ£ô
+  Γ£ô A.K.GUPTA - TL: 2c7fb974-d045-495b-b621-e5bd6ec4d2c2 ΓåÆ 2c7fb974-d045-495b-b621-e5bd6ec4d2c2, Dist: Γ£ô
+  Γ£ô MUKESH GUPTA - TL: 2c7fb974-d045-495b-b621-e5bd6ec4d2c2 ΓåÆ 2c7fb974-d045-495b-b621-e5bd6ec4d2c2, Dist: Γ£ô
+  Γ£ô VIRENDRA - TL: 2c7fb974-d045-495b-b621-e5bd6ec4d2c2 ΓåÆ 2c7fb974-d045-495b-b621-e5bd6ec4d2c2, Dist: Γ£ô
+
+UMASHANKAR SINGH (7 salesmen):
+  Γ£ô KAMLA - TL: 8cb943f8-6f8b-42ea-a67e-c119914969dc ΓåÆ 8cb943f8-6f8b-42ea-a67e-c119914969dc, Dist: Γ£ô
+  Γ£ô SP CHOUDARY - TL: 8cb943f8-6f8b-42ea-a67e-c119914969dc ΓåÆ 8cb943f8-6f8b-42ea-a67e-c119914969dc, Dist: Γ£ô
+  Γ£ô KB GUPTA - TL: 8cb943f8-6f8b-42ea-a67e-c119914969dc ΓåÆ 8cb943f8-6f8b-42ea-a67e-c119914969dc, Dist: Γ£ô
+  Γ£ô PRADEEP JAISWAL - TL: 8cb943f8-6f8b-42ea-a67e-c119914969dc ΓåÆ 8cb943f8-6f8b-42ea-a67e-c119914969dc, Dist: Γ£ô
+  Γ£ô PINTOO GUPTA - TL: 8cb943f8-6f8b-42ea-a67e-c119914969dc ΓåÆ 8cb943f8-6f8b-42ea-a67e-c119914969dc, Dist: Γ£ô
+  Γ£ô SHEESHNATH - TL: 8cb943f8-6f8b-42ea-a67e-c119914969dc ΓåÆ 8cb943f8-6f8b-42ea-a67e-c119914969dc, Dist: Γ£ô
+  Γ£ô ANIL - TL: 8cb943f8-6f8b-42ea-a67e-c119914969dc ΓåÆ 8cb943f8-6f8b-42ea-a67e-c119914969dc, Dist: Γ£ô
+
+=== Ready to Update Database ===
+This will update 48 salesmen records.
+
+
+=== Update Complete ===
+Γ£à Successfully updated: 48
+Γ¥î Errors: 0
+
+=== Verification ===
+
+Γ£à All salesmen have TL assigned!
+
+=== Final TL-DS Mapping ===
+
+395 ASLAM (6 salesmen):
+  AJAY GUPTA, ARUN JAISWAL, DILIP AGARWAL, JAYPRAKASH, KATYA (OPL), OM PRAKASH 1
+
+96 NAZIR(OPL) 1 (5 salesmen):
+  GUDDU, KAMLA 1, PATIL, SHYAMLAL, KUMAR
+
+ABBAS (7 salesmen):
+  SUMIT, BM YADAV, RAHUL GUPTA, SHIVKUMAR, MUNNALAL 2, SAROJ, SHUBHAM
+
+AJAY (4 salesmen):
+  AKASH  KANGARE, RINKU SINGH, SURESH YADAV, ANIL JESHWANI
+
+BAVISKAR_MU3714 (4 salesmen):
+  DHARMU, S.P., JITENDRA, SHEKKHAR
+
+DHARMENDRA_MU3713 (3 salesmen):
+  JAI PRAKASH JAISWAL, SANJAY SHARMA, RAJU YADAV
+
+DILIP_MU3680 (6 salesmen):
+  GHANSHYAM GUPTA, ALTAF, HANUMAN GUPTA, RAKESH YADAV, VINOD GUPTA, RAJENDRA DUBEY
+
+IMRAN (5 salesmen):
+  SURESH KANT KASHYUP, SHAILENDRA, DHIRAJ KASHYAP (OPL), PRASHANT 2, RAMASHANKAR
+
+JAIPRAKASH JAISWAL (6 salesmen):
+  NITIN KAMBLE, SANJAY PATHAK, VIVEK (VMC), RINKU SONI, VED PRAKASH, ANIL MISHRA
+
+NAMEER_MU3714 (4 salesmen):
+  AJAY, SURENDRA YADAV, HUZEFA, WAQAR
+
+PRAKASH_MU3714 (4 salesmen):
+  SACHIN, ATTAHULLAH, BHAGWAN, YASEER
+
+PRAVEEN_MU3573 (6 salesmen):
+  S.K GUPTA, PRAKASH, VIJAY GUPTA, SURESH GONGE, BASANT, ALOK
+
+RAHUL KUSHWAHA (5 salesmen):
+  AMIR, IRFAN AHMED ISAQ ATTAR, NAGESH(SADHURAM), ANIL PATHAK, RAJESH JAISWAL (VMC)
+
+RAJESH (5 salesmen):
+  RAM, SANJAY JHA, ZAHEER, SANDEEP GUPTA (VMC), VIJAY JAISWAL
+
+SANTOSH PRADHAN (6 salesmen):
+  AWDESH, PRAMOD GUPTA, SUNIL GUPTA, RAMJI, UMASHANKAR, DINESH GUPTA
+
+SHAILENDRA GUPTA (7 salesmen):
+  RUPENDRA, SIYARAM, SANTOSH JAISWAL, OMPRAKASH, A.K.GUPTA, MUKESH GUPTA, VIRENDRA
+
+SHANKAR KRISHNA SHARMA (5 salesmen):
+  ARUN GUPTA, SUGREW, SATYAPRAKASH, SANTOSH GUPTA, DAYASHANKAR
+
+UMASHANKAR SINGH (7 salesmen):
+  SP CHOUDARY, KB GUPTA, PRADEEP JAISWAL, PINTOO GUPTA, SHEESHNATH, ANIL, KAMLA
+
+VIRENDRA (5 salesmen):
+  CHANDAN, SANJAY SONIPAL, RAHUL, VINOD SURYANASHI, BABLU
