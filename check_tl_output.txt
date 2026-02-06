@@ -1,0 +1,27 @@
+﻿[dotenv@17.2.4] injecting env (2) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+=== Checking TL and Salesman Relationship ===
+
+Found 1 TL(s) matching NAZIR:
+  - 96 NAZIR(OPL) 1 (ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca)
+
+Found 1 salesman matching SHYAMLAL:
+  - SHYAMLAL (ID: 3f2d0642-c915-4520-b54c-c63df63df360)
+    Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+    Distributor ID: ae7bf837-a91b-4022-a069-f38a1def4beb
+
+=== Relationship Check ===
+TL: 96 NAZIR(OPL) 1 (903d7cfc-4c09-42f2-ba7e-a841e5232eca)
+DS: SHYAMLAL (3f2d0642-c915-4520-b54c-c63df63df360)
+DS's team_leader_id: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+Match: Γ£à YES
+
+
+=== All Salesmen for 96 NAZIR(OPL) 1 ===
+Total: 5
+1. GUDDU (ID: 0509b576-982e-4e95-a6e7-8a081d643ed0)
+2. KAMLA 1 (ID: 547b0f3e-4fa7-47c3-86d2-46bf0e3300eb)
+3. KUMAR (ID: b1e354b8-4a6e-4b18-aa69-13d7953c1989)
+4. PATIL (ID: 7de644fe-7991-4b00-9ee9-b87f92aaca78)
+5. SHYAMLAL (ID: 3f2d0642-c915-4520-b54c-c63df63df360)
+
+Γ£à All salesmen have team_leader_id assigned

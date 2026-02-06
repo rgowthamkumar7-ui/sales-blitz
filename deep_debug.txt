@@ -1,0 +1,50 @@
+﻿[dotenv@17.2.4] injecting env (2) from .env -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+=== DEEP DEBUG: 96 NAZIR(OPL) 1 ΓåÆ SHYAMLAL ===
+
+1. Searching for all NAZIR users...
+Found 1 users with NAZIR in name:
+
+  - 96 NAZIR(OPL) 1 (team_leader)
+    ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+    Phone: NULL
+
+Γ£à Found TL: 96 NAZIR(OPL) 1
+   ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+
+2. Searching for all SHYAMLAL users...
+Found 1 users with SHYAMLAL in name:
+
+  - SHYAMLAL (salesman)
+    ID: 3f2d0642-c915-4520-b54c-c63df63df360
+    Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+    Matches TL: Γ£à YES
+
+3. Getting ALL salesmen for this TL...
+Query returned 5 salesmen:
+
+1. GUDDU 
+   ID: 0509b576-982e-4e95-a6e7-8a081d643ed0
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+2. KAMLA 1 
+   ID: 547b0f3e-4fa7-47c3-86d2-46bf0e3300eb
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+3. KUMAR 
+   ID: b1e354b8-4a6e-4b18-aa69-13d7953c1989
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+4. PATIL 
+   ID: 7de644fe-7991-4b00-9ee9-b87f92aaca78
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+5. SHYAMLAL Γ¡É THIS IS SHYAMLAL
+   ID: 3f2d0642-c915-4520-b54c-c63df63df360
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+
+=== RESULT ===
+Γ£à SHYAMLAL IS IN THE SALESMEN LIST
+   The database query is working correctly.
+   The issue must be in the frontend.
+
+4. Checking for name variations...
+Found 3 salesmen with similar names:
+  - GHANSHYAM GUPTA (TL: bc30e683-e9dc-4879-b629-142e7c6e8f04)
+  - MUNNALAL 2 (TL: 29ff86f2-999b-4af4-b048-96a1ae6c9e2d)
+  - SHYAMLAL (TL: 903d7cfc-4c09-42f2-ba7e-a841e5232eca)

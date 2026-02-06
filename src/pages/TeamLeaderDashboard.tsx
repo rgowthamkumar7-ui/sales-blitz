@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Package, ArrowLeft, LogOut, ChevronRight, Check, Calendar, ChevronLeft, ChevronRightIcon, Store, ClipboardList, TrendingUp, MapPin, Edit2, Loader2 } from 'lucide-react';
+import { Users, Package, ArrowLeft, LogOut, ChevronRight, Check, Calendar, ChevronLeft, ChevronRightIcon, Store, ClipboardList, TrendingUp, MapPin, Edit2, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -46,30 +46,36 @@ const TeamLeaderContent: React.FC = () => {
   const [activeSKUs, setActiveSKUs] = useState<SKU[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Fetch salesmen and SKUs from Supabase
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!currentUser?.id) return;
+  const fetchData = useCallback(async () => {
+    if (!currentUser?.id) return;
 
-      setIsLoadingData(true);
-      try {
-        const [salesmen, skus] = await Promise.all([
-          userService.getSalesmenForTeamLeader(currentUser.id),
-          skuService.getActive()
-        ]);
+    setIsLoadingData(true);
+    try {
+      const [salesmen, skus] = await Promise.all([
+        userService.getSalesmenForTeamLeader(currentUser.id),
+        skuService.getActive()
+      ]);
 
-        setAssignedSalesmen(salesmen);
-        setActiveSKUs(skus);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setIsLoadingData(false);
-      }
-    };
-
-    fetchData();
+      console.log(`Fetched ${salesmen.length} salesmen for TL ${currentUser.name}`);
+      setAssignedSalesmen(salesmen);
+      setActiveSKUs(skus);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setIsLoadingData(false);
+    }
   }, [currentUser?.id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData, refreshTrigger]);
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   // Check if salesman has entry for selected date
   const getSalesmanStatus = (salesmanId: string) => {
@@ -111,53 +117,81 @@ const TeamLeaderContent: React.FC = () => {
   };
 
   const handleSelectSalesman = (salesman: User) => {
-    setSelectedSalesman(salesman);
+    try {
+      console.log('=== SALESMAN SELECTION STARTED ===');
+      console.log('Selected salesman:', salesman.name, salesman.id);
+      console.log('Salesman object:', JSON.stringify(salesman, null, 2));
 
-    // Get mapped outlets
-    const mappedOutlets = getSalesmanMappedOutlets(salesman.id);
-    setMappedOutletsInput(mappedOutlets > 0 ? mappedOutlets.toString() : '');
+      setSelectedSalesman(salesman);
+      console.log('✓ setSelectedSalesman called');
 
-    // CHECK FOR ANALYSIS (After 5th of month)
-    const today = new Date();
-    // Use selectedDate effectively if it's "today" or generally always check relative to "today" for the alert?
-    // Requirement: "This should start after 5th of every month"
-    // Requirement: "For last 3 days"
+      // Get mapped outlets
+      const mappedOutlets = getSalesmanMappedOutlets(salesman.id);
+      console.log('Mapped outlets:', mappedOutlets);
+      setMappedOutletsInput(mappedOutlets > 0 ? mappedOutlets.toString() : '');
+      console.log('✓ Mapped outlets set');
 
-    // We should check if the CURRENT day is > 5th
-    const currentDayOfMonth = today.getDate();
+      // CHECK FOR ANALYSIS (After 5th of month)
+      const today = new Date();
+      const currentDayOfMonth = today.getDate();
+      console.log('Current day of month:', currentDayOfMonth);
 
-    if (currentDayOfMonth > 5) {
-      // Calculate last 3 days range
-      const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(today.getDate() - 3);
-      const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
-      const todayStr = today.toISOString().split('T')[0];
+      if (currentDayOfMonth > 5) {
+        console.log('After 5th - checking for missing SKUs');
 
-      // Get all transactions for this salesman in the last 30 days (already in context)
-      // Filter for last 3 days
-      const recentSales = transactions.filter(t => {
-        const tDateStr = new Date(t.timestamp).toISOString().split('T')[0];
-        return t.salesmanId === salesman.id && tDateStr >= threeDaysAgoStr && tDateStr <= todayStr;
-      });
+        // Calculate last 3 days range
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(today.getDate() - 3);
+        const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
+        const todayStr = today.toISOString().split('T')[0];
+        console.log('Date range:', threeDaysAgoStr, 'to', todayStr);
 
-      // Find SKUs with NO sales in this period
-      const missing = activeSKUs.filter(sku => {
-        const skuSales = recentSales.filter(t => t.skuId === sku.id);
-        const totalQty = skuSales.reduce((sum, t) => sum + t.quantity, 0);
-        return totalQty === 0;
-      });
+        // Get all transactions for this salesman in the last 30 days (already in context)
+        // Filter for last 3 days
+        const recentSales = transactions.filter(t => {
+          const tDateStr = new Date(t.timestamp).toISOString().split('T')[0];
+          return t.salesmanId === salesman.id && tDateStr >= threeDaysAgoStr && tDateStr <= todayStr;
+        });
 
-      if (missing.length > 0) {
-        setMissingSKUs(missing);
-        setShowAnalysisPopup(true);
-        // Don't set view to 'entry' yet, wait for popup close
+        console.log(`Recent sales for ${salesman.name}:`, recentSales.length);
+        console.log('Active SKUs count:', activeSKUs.length);
+
+        // Find SKUs with NO sales in this period
+        const missing = activeSKUs.filter(sku => {
+          const skuSales = recentSales.filter(t => t.skuId === sku.id);
+          const totalQty = skuSales.reduce((sum, t) => sum + t.quantity, 0);
+          return totalQty === 0;
+        });
+
+        console.log(`Missing SKUs for ${salesman.name}:`, missing.length);
+        if (missing.length > 0) {
+          console.log('Missing SKU names:', missing.map(s => s.name).join(', '));
+        }
+
+        if (missing.length > 0) {
+          console.log('✓ Showing analysis popup');
+          setMissingSKUs(missing);
+          setShowAnalysisPopup(true);
+          console.log('✓ Analysis popup state set');
+          // Don't set view to 'entry' yet, wait for popup close
+        } else {
+          // No missing SKUs, proceed to entry
+          console.log('✓ No missing SKUs, proceeding to entry');
+          prepareEntryView(salesman);
+          console.log('✓ prepareEntryView called');
+        }
       } else {
-        // No missing SKUs, proceed to entry
+        // Before 5th, proceed directly
+        console.log('✓ Before 5th, proceeding directly to entry');
         prepareEntryView(salesman);
+        console.log('✓ prepareEntryView called');
       }
-    } else {
-      // Before 5th, proceed directly
-      prepareEntryView(salesman);
+
+      console.log('=== SALESMAN SELECTION COMPLETED ===');
+    } catch (error) {
+      console.error('❌ ERROR in handleSelectSalesman:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      alert(`Error selecting salesman: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -294,6 +328,23 @@ const TeamLeaderContent: React.FC = () => {
           <p className="text-muted-foreground">Loading data...</p>
         </div>
       </div>
+    );
+  }
+
+  // Analysis Popup - CHECK THIS FIRST before any view rendering
+  if (showAnalysisPopup && selectedSalesman) {
+    console.log('🔔 Rendering Analysis Popup');
+    return (
+      <AnalysisPopup
+        isOpen={showAnalysisPopup}
+        onClose={() => {
+          console.log('Analysis popup closed');
+          setShowAnalysisPopup(false);
+          prepareEntryView(selectedSalesman);
+        }}
+        missingSKUs={missingSKUs}
+        salesmanName={selectedSalesman.name}
+      />
     );
   }
 
@@ -564,6 +615,16 @@ const TeamLeaderContent: React.FC = () => {
               <p className="text-white/80 text-sm">Select Salesman</p>
               <h1 className="text-xl font-bold">{formatDate(selectedDate)}</h1>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={isLoadingData}
+              className="text-white/80 hover:text-white hover:bg-white/10"
+              title="Refresh salesmen list"
+            >
+              <RefreshCw size={20} className={isLoadingData ? 'animate-spin' : ''} />
+            </Button>
           </div>
 
           {/* Progress */}
@@ -587,6 +648,17 @@ const TeamLeaderContent: React.FC = () => {
         <div className="px-4 -mt-4">
           <Card className="p-4 shadow-lg mb-4">
             <div className="space-y-2">
+              {(() => {
+                console.log('=== RENDERING SALESMEN LIST ===');
+                console.log('Total salesmen:', assignedSalesmen.length);
+                console.log('Salesmen names:', assignedSalesmen.map(s => s.name).join(', '));
+                const shyamlal = assignedSalesmen.find(s => s.name.toUpperCase().includes('SHYAMLAL'));
+                console.log('SHYAMLAL in list:', shyamlal ? 'YES ✅' : 'NO ❌');
+                if (shyamlal) {
+                  console.log('SHYAMLAL details:', JSON.stringify(shyamlal, null, 2));
+                }
+                return null;
+              })()}
               {assignedSalesmen.map((salesman, index) => {
                 const status = getSalesmanStatus(salesman.id);
 
@@ -637,21 +709,6 @@ const TeamLeaderContent: React.FC = () => {
   }
 
   // ENTRY VIEW
-  // Analysis Popup
-  if (showAnalysisPopup && selectedSalesman) {
-    return (
-      <AnalysisPopup
-        isOpen={showAnalysisPopup}
-        onClose={() => {
-          setShowAnalysisPopup(false);
-          prepareEntryView(selectedSalesman);
-        }}
-        missingSKUs={missingSKUs}
-        salesmanName={selectedSalesman.name}
-      />
-    );
-  }
-
   if (!selectedSalesman) return null;
 
   const prevDaySales = getPreviousDaySales(selectedSalesman.id);

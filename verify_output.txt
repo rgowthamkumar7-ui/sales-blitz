@@ -1,0 +1,47 @@
+﻿[dotenv@17.2.4] injecting env (2) from .env -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+=== Verifying TL Access to Salesmen ===
+
+Γ£à Found TL: 96 NAZIR(OPL) 1 (903d7cfc-4c09-42f2-ba7e-a841e5232eca)
+
+Γ£à Query returned 5 salesmen for this TL:
+
+1. GUDDU
+   ID: 0509b576-982e-4e95-a6e7-8a081d643ed0
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+   Distributor ID: ae7bf837-a91b-4022-a069-f38a1def4beb
+
+2. KAMLA 1
+   ID: 547b0f3e-4fa7-47c3-86d2-46bf0e3300eb
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+   Distributor ID: ae7bf837-a91b-4022-a069-f38a1def4beb
+
+3. KUMAR
+   ID: b1e354b8-4a6e-4b18-aa69-13d7953c1989
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+   Distributor ID: ae7bf837-a91b-4022-a069-f38a1def4beb
+
+4. PATIL
+   ID: 7de644fe-7991-4b00-9ee9-b87f92aaca78
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+   Distributor ID: ae7bf837-a91b-4022-a069-f38a1def4beb
+
+5. SHYAMLAL
+   ID: 3f2d0642-c915-4520-b54c-c63df63df360
+   Team Leader ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+   Distributor ID: ae7bf837-a91b-4022-a069-f38a1def4beb
+
+Γ£à SHYAMLAL IS IN THE LIST!
+   This means the TL should be able to see and select SHYAMLAL.
+
+
+=== Summary ===
+TL Name: 96 NAZIR(OPL) 1
+TL ID: 903d7cfc-4c09-42f2-ba7e-a841e5232eca
+Total Salesmen: 5
+SHYAMLAL in list: YES Γ£à
+
+Γ£à The database query is working correctly.
+If the TL still cannot see salesmen in the app:
+1. The TL needs to refresh the page or click the refresh button
+2. Check browser console for errors
+3. Clear browser cache and try again
