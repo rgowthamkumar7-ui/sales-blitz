@@ -97,7 +97,9 @@ const TeamLeaderContent: React.FC = () => {
 
     // Get today's total sales
     const todaySales = transactions.filter(t => {
-      const txnDate = new Date(t.timestamp).toISOString().split('T')[0];
+      const txnDate = t.timestamp.includes('T')
+        ? new Date(t.timestamp).toISOString().split('T')[0]
+        : t.timestamp.split('T')[0];
       const salesman = assignedSalesmen.find(s => s.id === t.salesmanId);
       return txnDate === selectedDate && salesman;
     });
@@ -149,7 +151,9 @@ const TeamLeaderContent: React.FC = () => {
         // Get all transactions for this salesman in the last 30 days (already in context)
         // Filter for last 3 days
         const recentSales = transactions.filter(t => {
-          const tDateStr = new Date(t.timestamp).toISOString().split('T')[0];
+          const tDateStr = t.timestamp.includes('T')
+            ? new Date(t.timestamp).toISOString().split('T')[0]
+            : t.timestamp.split('T')[0];
           return t.salesmanId === salesman.id && tDateStr >= threeDaysAgoStr && tDateStr <= todayStr;
         });
 
@@ -236,6 +240,17 @@ const TeamLeaderContent: React.FC = () => {
 
   const handleSubmitSales = async () => {
     if (!selectedSalesman || !currentUser) return;
+
+    // Prevent future date entries
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selected = new Date(selectedDate);
+    selected.setHours(0, 0, 0, 0);
+
+    if (selected > today) {
+      alert('Cannot enter sales data for future dates. Please select today or a previous date.');
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -530,19 +545,26 @@ const TeamLeaderContent: React.FC = () => {
 
                 // Days of month
                 for (let d = 1; d <= daysInMonth; d++) {
-                  const date = new Date(today.getFullYear(), today.getMonth(), d);
-                  const dateStr = date.toISOString().split('T')[0];
+                  // Create date string directly to avoid timezone issues
+                  const year = today.getFullYear();
+                  const month = String(today.getMonth() + 1).padStart(2, '0');
+                  const day = String(d).padStart(2, '0');
+                  const dateStr = `${year}-${month}-${day}`;
+
+                  // Create date object for comparison (set to noon to avoid timezone issues)
+                  const date = new Date(year, today.getMonth(), d, 12, 0, 0);
 
                   // Calculate stats for this day
-                  // Filter transactions for this date to find unique salesmen who sold something
-                  const salesmenWithSales = new Set(
-                    transactions
-                      .filter(t => {
-                        const tDate = new Date(t.timestamp).toISOString().split('T')[0];
-                        return tDate === dateStr && assignedSalesmen.some(s => s.id === t.salesmanId);
-                      })
-                      .map(t => t.salesmanId)
-                  ).size;
+                  // Count how many of the assigned salesmen have entries for this specific date
+                  const salesmenWithSales = assignedSalesmen.filter(salesman => {
+                    return transactions.some(t => {
+                      // Handle both date strings (YYYY-MM-DD) and ISO timestamps
+                      const tDate = t.timestamp.includes('T')
+                        ? new Date(t.timestamp).toISOString().split('T')[0]
+                        : t.timestamp.split('T')[0]; // Already a date string
+                      return tDate === dateStr && t.salesmanId === salesman.id;
+                    });
+                  }).length;
 
                   const totalStats = assignedSalesmen.length;
                   const isHalfDone = totalStats > 0 && salesmenWithSales >= (totalStats / 2);
@@ -747,10 +769,33 @@ const TeamLeaderContent: React.FC = () => {
           </div>
         </div>
 
-        {/* Date Badge */}
-        <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 w-fit">
-          <Calendar size={14} />
-          <span className="text-sm font-medium">{formatDate(selectedDate)}</span>
+        {/* Date Badge with validation indicator */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 w-fit">
+            <Calendar size={14} />
+            <span className="text-sm font-medium">{formatDate(selectedDate)}</span>
+          </div>
+          {(() => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selected = new Date(selectedDate);
+            selected.setHours(0, 0, 0, 0);
+
+            if (selected > today) {
+              return (
+                <p className="text-xs text-red-300 flex items-center gap-1">
+                  ⚠️ Future dates cannot be edited
+                </p>
+              );
+            } else if (selected < today) {
+              return (
+                <p className="text-xs text-white/70">
+                  ✓ Editing previous date entry
+                </p>
+              );
+            }
+            return null;
+          })()}
         </div>
       </div>
 
@@ -886,7 +931,14 @@ const TeamLeaderContent: React.FC = () => {
         <Button
           className="w-full h-14 text-lg font-bold rounded-xl shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
           onClick={handleSubmitSales}
-          disabled={(!hasAnyData && !Object.keys(salesInputs).length) || isSaving}
+          disabled={(() => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selected = new Date(selectedDate);
+            selected.setHours(0, 0, 0, 0);
+            const isFutureDate = selected > today;
+            return (!hasAnyData && !Object.keys(salesInputs).length) || isSaving || isFutureDate;
+          })()}
         >
           {isSaving ? (
             <>

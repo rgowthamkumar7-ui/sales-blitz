@@ -149,7 +149,9 @@ export const SalesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             // Update local state
             setTransactions(prev => {
                 const filtered = prev.filter(t => {
-                    const txnDate = new Date(t.timestamp).toISOString().split('T')[0];
+                    const txnDate = t.timestamp.includes('T')
+                        ? new Date(t.timestamp).toISOString().split('T')[0]
+                        : t.timestamp.split('T')[0];
                     return !(t.salesmanId === salesmanId && txnDate === selectedDate);
                 });
                 return [...filtered, ...newTransactions];
@@ -163,7 +165,9 @@ export const SalesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Get sales for a specific salesman on a specific date
     const getSalesmanSalesForDate = (salesmanId: string, date: string): SaleTransaction[] => {
         return transactions.filter(t => {
-            const txnDate = new Date(t.timestamp).toISOString().split('T')[0];
+            const txnDate = t.timestamp.includes('T')
+                ? new Date(t.timestamp).toISOString().split('T')[0]
+                : t.timestamp.split('T')[0];
             return t.salesmanId === salesmanId && txnDate === date;
         });
     };
@@ -171,7 +175,9 @@ export const SalesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Check if salesman has any entry for a specific date
     const hasSalesmanEntryForDate = (salesmanId: string, date: string): boolean => {
         return transactions.some(t => {
-            const txnDate = new Date(t.timestamp).toISOString().split('T')[0];
+            const txnDate = t.timestamp.includes('T')
+                ? new Date(t.timestamp).toISOString().split('T')[0]
+                : t.timestamp.split('T')[0];
             return t.salesmanId === salesmanId && txnDate === date;
         });
     };

@@ -455,12 +455,23 @@ const ManagerContent: React.FC = () => {
 
     // Create single sheet with all transaction data
     const reportData: any[] = [
-      ['WD Code', 'TL Name', 'TL ID', 'DS Name', 'Date', 'Month', 'SKU Name', 'SKU Code', 'Quantity Sold', 'Outlets']
+      ['WD Code', 'TL Name', 'TL ID', 'DS Name', 'Date', 'Month', 'SKU Name', 'Quantity Sold', 'Outlets']
     ];
 
     exportTransactions.forEach(t => {
       const salesman = allUsers.find(u => u.id === t.salesmanId);
-      const tl = allUsers.find(u => u.id === salesman?.teamLeaderId);
+
+      // Enhanced TL lookup with role validation
+      let tl = null;
+      if (salesman?.teamLeaderId) {
+        tl = allUsers.find(u => u.id === salesman.teamLeaderId && u.role === 'team_leader');
+      }
+
+      // Log if TL is missing (for debugging)
+      if (!tl && salesman) {
+        console.warn(`Missing TL for salesman ${salesman.name} (ID: ${salesman.id}, TL ID: ${salesman.teamLeaderId})`);
+      }
+
       const wd = allDistributors.find(d => d.id === salesman?.distributorId);
       const sku = allSKUs.find(s => s.id === t.skuId);
       const txnDate = new Date(t.timestamp);
@@ -473,10 +484,18 @@ const ManagerContent: React.FC = () => {
         txnDate.toLocaleDateString('en-IN'),
         txnDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
         sku?.name || 'N/A',
-        sku?.id || 'N/A',
         t.quantity,
         t.outletCount || 0
       ]);
+    });
+
+    // Log export summary for verification
+    console.log('Export Summary:', {
+      totalTransactions: exportTransactions.length,
+      dateRange: `${exportStartDate} to ${exportEndDate}`,
+      uniqueSalesmen: new Set(exportTransactions.map(t => t.salesmanId)).size,
+      uniqueTLs: new Set(reportData.slice(1).map(row => row[2]).filter(id => id !== 'N/A')).size,
+      uniqueWDs: new Set(reportData.slice(1).map(row => row[0]).filter(code => code !== 'N/A')).size
     });
 
     // Create workbook with single sheet
@@ -492,7 +511,6 @@ const ManagerContent: React.FC = () => {
       { wch: 12 },  // Date
       { wch: 18 },  // Month
       { wch: 20 },  // SKU Name
-      { wch: 10 },  // SKU Code
       { wch: 12 },  // Quantity Sold
       { wch: 10 },  // Outlets
     ];

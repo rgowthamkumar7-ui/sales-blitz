@@ -11,7 +11,7 @@ function transformTransaction(row: any): SaleTransaction {
         quantity: row.quantity,
         outletCount: row.outlet_count || 1,
         points: row.points || 0,
-        timestamp: row.created_at,
+        timestamp: row.transaction_date || row.created_at, // Use transaction_date, fallback to created_at
     };
 }
 
